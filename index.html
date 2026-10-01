@@ -88,7 +88,9 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 
 /* ===== Calculators ===== */
 .calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
-.calc-grid .card{margin-bottom:0}
+.calc-grid>.card{margin-bottom:0;min-width:0}
+.calc-grid,.grid,.sig{min-width:0}
+.tab{min-width:0}
 .calc .out{background:#f2f8f6;border:1px dashed #bcd8d0;border-radius:8px;padding:9px 11px;font-size:14px;margin-top:10px;line-height:1.65}
 .calc .out b{font-size:15.5px}
 .calc .out .dim{color:var(--muted);font-size:12.5px}
@@ -99,7 +101,7 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted);font-size:12.5px;line-height:1.55}
 
 @media (max-width:720px){
-  .grid{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .calc-grid{grid-template-columns:1fr}
   .sig{gap:20px}
 }
@@ -128,7 +130,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 <body>
 <header class="app">
   <div class="app-row">
-    <div class="logo">VetTools<span class="ver">v1.0</span></div>
+    <div class="logo">VetTools<span class="ver">v1.1</span></div>
     <div class="toolbar">
       <span class="savestate" id="savestate"></span>
       <button class="btn primary" onclick="window.print()">Печать</button>
@@ -638,26 +640,36 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </main>
 
 <footer class="app">
-  VetTools v1.0 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
+  VetTools v1.1 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
   расчёты справочные и не заменяют клинического суждения · часть экосистемы VetInSilico
 </footer>
 <script>
 "use strict";
 /* ================= VetTools v1.0 — ядро ================= */
-var VERSION = "1.0.0";
+var VERSION = "1.1.0";
 var LS_PREFIX = "vt:" + VERSION + ":";
+/* миграция: переносим данные версии 1.0.x в текущее хранилище, чтобы ничего не потерять после обновления файла */
+try{
+  if(!localStorage.getItem(LS_PREFIX+"seen")){
+    var oldP = "vt:1.0.0:";
+    for(var i=localStorage.length-1; i>=0; i--){
+      var k = localStorage.key(i);
+      if(k && k.indexOf(oldP)===0){ localStorage.setItem(LS_PREFIX+k.slice(oldP.length), localStorage.getItem(k)); }
+    }
+  }
+}catch(e){}
 var TAB_IDS = ["soap","dis","con","obs","ane","pro","nec","cal","dif"];
 var $ = function(s,r){ return (r||document).querySelector(s); };
 var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
 var byId = function(id){ return document.getElementById(id); };
 var num = function(v){ var n = parseFloat(String(v).replace(",",".")); return isFinite(n) ? n : null; };
-var fmt = function(n,d){ if(!isFinite(n)) return "—"; d=(d==null?2:d); return n.toLocaleString("ru-RU",{maximumFractionDigits:d}); };
+var fmt = function(n,d){ if(n==null||!isFinite(n)) return "—"; d=(d==null?2:d); return n.toLocaleString("ru-RU",{maximumFractionDigits:d}); };
 var today = function(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); };
 
 /* ---------- вкладки ---------- */
 var activeTab = "soap";
 function activateTab(id){
-  if(id!==activeTab) saveTab(activeTab, true); /* флаш отложенного сохранения прежней вкладки */
+  if(id!==activeTab){ dirty[activeTab] = true; flushDirty(); } /* флаш всех отложенных правок при смене вкладки */
   activeTab = id;
   $$("#tabs button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab===id); });
   TAB_IDS.forEach(function(t){ byId("tab-"+t).classList.toggle("active", t===id); });
@@ -671,6 +683,7 @@ $("#tabs").addEventListener("click", function(e){
 
 /* ---------- автосохранение ---------- */
 var saveTimer = null;
+var dirty = {}; /* какие вкладки содержат несохранённые правки (в т.ч. автозаполнение скрытых полей) */
 function markSaved(){
   var el = byId("savestate"), d = new Date();
   el.textContent = "Сохранено " + ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2);
@@ -688,7 +701,7 @@ function collectTab(tab){
   return data;
 }
 function applyTab(tab, data){
-  if(!data) return;
+  if(!data || typeof data!=="object" || Array.isArray(data)) return;
   $$("input[id],select[id],textarea[id]", tab).forEach(function(el){
     if(!(el.id in data)) return;
     var v = data[el.id];
@@ -715,7 +728,14 @@ function saveTab(id, silent){
 }
 function saveSoon(){
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(function(){ saveTab(activeTab); recalcActive(); }, 350);
+  saveTimer = setTimeout(flushDirty, 350);
+}
+function flushDirty(){
+  var tabs = Object.keys(dirty); dirty = {};
+  if(!tabs.length){ return; }
+  tabs.forEach(function(t){ saveTab(t, t!==activeTab); });
+  recalcActive();
+  if(tabs.indexOf(activeTab)>=0) markSaved();
 }
 function restoreTab(id){
   var raw = null;
@@ -747,7 +767,7 @@ document.addEventListener("click", function(e){
   var del = e.target.closest(".rowbtn");
   if(del){
     var tr = del.closest("tr");
-    if(tr){ tr.parentNode.removeChild(tr); saveSoon(); recalcActive(); }
+    if(tr){ var t = tr.closest(".tab"); tr.parentNode.removeChild(tr); if(t) dirty[t.id.slice(4)] = true; saveSoon(); recalcActive(); }
   }
 });
 
@@ -760,12 +780,17 @@ function autosize(t){
 }
 
 /* ---------- события ввода ---------- */
+function markDirtyTab(el){
+  var t = el.closest(".tab");
+  dirty[t ? t.id.slice(4) : activeTab] = true; /* сохраняем ту вкладку, где реально изменено поле */
+}
 document.addEventListener("input", function(e){
   if(e.target.matches("textarea")) autosize(e.target);
+  if(e.target.matches("input,select,textarea")) markDirtyTab(e.target);
   saveSoon();
 });
 document.addEventListener("change", function(e){
-  if(e.target.matches("select")) saveSoon();
+  if(e.target.matches("select")){ markDirtyTab(e.target); saveSoon(); }
 });
 
 /* ---------- стартовые значения ---------- */
@@ -1014,6 +1039,7 @@ byId("pro-del").addEventListener("click", function(){
   var v=byId("pro-pick").value||"";
   if(v.indexOf("my:")!==0){ alert("Выберите в списке «мой» протокол (в группе «Мои протоколы»)."); return; }
   var i=+v.split(":")[1];
+  if(!proCustoms[i]){ proRebuildPick(); alert("Этот протокол уже удалён — список обновлён."); return; }
   if(!confirm("Удалить протокол «"+proCustoms[i].title+"»?")) return;
   proCustoms.splice(i,1); proWriteCustoms(); proRebuildPick();
 });
@@ -1037,12 +1063,12 @@ function conProcList(){
 }
 function buildConsent(){
   var list = conProcList();
-  var petLine = "Животное: "+[byId("con-species").value, byId("con-breed").value, byId("con-pet").value ? "кличка «"+byId("con-pet").value+"»" : "",
-    byId("con-sex").value, byId("con-age").value, byId("con-color").value, byId("con-id").value].filter(Boolean).join(", ") || "____";
+  var petLine = "Животное: "+[esc(byId("con-species").value), esc(byId("con-breed").value), byId("con-pet").value ? "кличка «"+esc(byId("con-pet").value)+"»" : "",
+    esc(byId("con-sex").value), esc(byId("con-age").value), esc(byId("con-color").value), esc(byId("con-id").value)].filter(Boolean).join(", ") || "____";
   var dateVal = byId("con-date").value;
   var dateStr = dateVal ? dateVal.split("-").reverse().join(".") : "«___» __________ 20___ г.";
   var h = "<h3>ИНФОРМИРОВАННОЕ СОГЛАСИЕ НА ПРОВЕДЕНИЕ МАНИПУЛЯЦИЙ, СЕДАЦИИ / АНЕСТЕЗИИ И ОПЕРАТИВНОГО ВМЕШАТЕЛЬСТВА</h3>";
-  h += "<p>Я, <b>"+(byId("con-owner").value||"________")+"</b>"+(byId("con-doc").value? " ("+esc(byId("con-doc").value)+")":"")+
+  h += "<p>Я, <b>"+(esc(byId("con-owner").value)||"________")+"</b>"+(byId("con-doc").value? " ("+esc(byId("con-doc").value)+")":"")+
        ", являясь владельцем (уполномоченным лицом) животного, даю согласие ветеринарной клинике и ветеринарному врачу на проведение следующих манипуляций в отношении животного.</p>";
   h += "<p>"+petLine+".</p>";
   if(list.length){ h += "<p><b>Согласуются:</b></p><ul>"+list.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ul>"; }
@@ -1082,8 +1108,8 @@ function buildDisText(){
   if(byId("dis-feed").value) L.push("\nКОРМЛЕНИЕ:\n"+byId("dis-feed").value);
   if(byId("dis-rest").value) L.push("\nОГРАНИЧЕНИЯ:\n"+byId("dis-rest").value);
   if(byId("dis-wound").value) L.push("\nШОВ / РАНА:\n"+byId("dis-wound").value);
-  var nxt = [byId("dis-next").value, byId("dis-nexttime").value].filter(Boolean).join(" ");
-  if(nxt) L.push("\nКОНТРОЛЬНЫЙ ПРИЁМ: "+nxt.split("-").reverse().join(" ").replace(" "," в "));
+  var nxtD = byId("dis-next").value, nxtT = byId("dis-nexttime").value;
+  if(nxtD) L.push("\nКОНТРОЛЬНЫЙ ПРИЁМ: "+nxtD.split("-").reverse().join(".")+(nxtT?" в "+nxtT:""));
   if(byId("dis-urgent").value) L.push("\nСРОЧНО К ВРАЧУ, ЕСЛИ:\n"+byId("dis-urgent").value);
   if(byId("dis-clinic").value) L.push("\nКонтакты: "+byId("dis-clinic").value);
   return L.join("\n");
@@ -1139,15 +1165,19 @@ byId("import-file").addEventListener("change", function(e){
     if(ok && (!data || data.app!=="VetTools" || !data.tabs)){ ok=false; }
     if(!ok){ alert("Это не похоже на резервную копию VetTools."); return; }
     if(!confirm("Загрузить резервную копию и перезаписать текущие данные во всех разделах?")) return;
+    var bad = [];
     TAB_IDS.forEach(function(t){
-      if(data.tabs[t]) applyTab(byId("tab-"+t), data.tabs[t]);
-      saveTab(t, true);
+      var td = data.tabs[t];
+      if(!td){ return; }
+      if(typeof td!=="object" || Array.isArray(td)){ bad.push(t); return; }
+      try{ applyTab(byId("tab-"+t), td); saveTab(t, true); }
+      catch(err){ bad.push(t); }
     });
-    if(Array.isArray(data.tabs.pro.customs)){ proCustoms = data.tabs.pro.customs; proWriteCustoms(); proRebuildPick(); }
+    if(data.tabs.pro && Array.isArray(data.tabs.pro.customs)){ proCustoms = data.tabs.pro.customs; proWriteCustoms(); proRebuildPick(); }
     $$("textarea").forEach(autosize);
     recalcActive(); buildConsent();
     markSaved();
-    alert("Резервная копия загружена.");
+    alert(bad.length ? "Копия загружена, но разделы "+bad.join(", ")+" в файле повреждены — они пропущены, остальные перенесены." : "Резервная копия загружена.");
   };
   r.readAsText(f);
   e.target.value = "";
