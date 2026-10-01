@@ -1,0 +1,1185 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>VetTools — офлайн-инструменты ветврача</title>
+<style>
+:root{
+  --bg:#f2f5f4; --card:#fff; --ink:#182420; --muted:#63706b; --line:#dbe3e0;
+  --accent:#0e7c66; --accent-dark:#0b5d4e; --ok:#177a3d; --warn:#9a6b00; --bad:#b3261e;
+  --radius:12px;
+  --shadow:0 1px 2px rgba(20,40,35,.06), 0 4px 14px rgba(20,40,35,.05);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+
+/* ===== Header / nav / toolbar ===== */
+header.app{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 16px 12px}
+.app-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1200px;margin:0 auto}
+.logo{font-weight:800;font-size:21px;letter-spacing:-.3px;color:var(--accent-dark);user-select:none}
+.logo .ver{font-size:11px;font-weight:700;color:var(--muted);background:#eef3f1;border:1px solid var(--line);border-radius:99px;padding:1px 8px;vertical-align:3px;margin-left:6px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.savestate{font-size:12px;color:var(--muted);min-width:110px}
+nav#tabs{display:flex;gap:6px;flex-wrap:wrap;margin:9px auto 0;max-width:1200px}
+#tabs button{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:6px 13px;font:600 13.5px/1.2 inherit;cursor:pointer}
+#tabs button:hover{border-color:var(--accent);color:var(--accent)}
+#tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* ===== Buttons ===== */
+.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:7px 13px;font:600 13.5px/1.2 inherit;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-dark);color:#fff}
+.btn.ghost{border-style:dashed;color:var(--accent);border-color:#bcd8d0}
+.btn.danger{color:var(--bad);border-color:#e6c5c2}
+.btn.danger:hover{border-color:var(--bad);color:var(--bad)}
+.btn.sm{padding:4px 9px;font-size:12.5px}
+
+/* ===== Layout ===== */
+main{max-width:1200px;margin:18px auto 40px;padding:0 16px}
+.tab{display:none}
+.tab.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:17px;line-height:1.3}
+.card h2 .sub{font-weight:500;font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px 14px}
+.grid.wide{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.f>label,.f>.lbl{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+input[type=text],input[type=date],input[type=time],input[type=number],input[type=tel],select,textarea{
+  width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;color:var(--ink);background:#fff;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,124,102,.12)}
+textarea{resize:vertical;min-height:64px;line-height:1.45;overflow:hidden}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:3px 0}
+
+/* ===== Tables ===== */
+.tbl-wrap{overflow-x:auto}
+table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
+.grid-t th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);text-align:left;padding:6px;border-bottom:2px solid var(--line);white-space:nowrap}
+.grid-t td{padding:4px;border-bottom:1px solid var(--line);vertical-align:top}
+.grid-t input,.grid-t select{padding:5px 7px;font-size:13.5px}
+.grid-t .rowbtn{margin-top:2px}
+.rowbtn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:7px;width:26px;height:26px;font:700 14px/1 inherit;cursor:pointer;flex:none}
+.rowbtn:hover{color:var(--bad);border-color:var(--bad)}
+.toolbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ===== Misc ===== */
+.badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.badge.ok{background:#e6f4ea;color:var(--ok)}
+.badge.warn{background:#fbf3dd;color:var(--warn)}
+.badge.bad{background:#fdeceb;color:var(--bad)}
+.badge.dim{background:#eef1f0;color:var(--muted)}
+.hint{font-size:12.5px;color:var(--muted);margin:4px 0 10px}
+.legal{font-size:13.5px;line-height:1.6;text-align:justify}
+.legal h3{text-align:center;font-size:15px;margin:6px 0 14px}
+.legal ul{margin:6px 0;padding-left:20px}
+.sig{display:flex;gap:40px;margin-top:30px;max-width:640px}
+.sig .sigbox{flex:1}
+.sig .sigline{border-bottom:1.5px solid #444;height:28px}
+.sig .sigcap{font-size:12px;color:var(--muted);margin-top:3px}
+.banner{background:#eef7f4;border:1px solid #cfe5df;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13.5px}
+.banner b{color:var(--accent-dark)}
+.banner button{float:right;margin-left:12px}
+.doc-title{font-size:18px;font-weight:800;margin-bottom:10px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+
+/* ===== Calculators ===== */
+.calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+.calc-grid .card{margin-bottom:0}
+.calc .out{background:#f2f8f6;border:1px dashed #bcd8d0;border-radius:8px;padding:9px 11px;font-size:14px;margin-top:10px;line-height:1.65}
+.calc .out b{font-size:15.5px}
+.calc .out .dim{color:var(--muted);font-size:12.5px}
+.conv-tbl td{padding:5px 4px}
+.conv-tbl input{padding:5px 7px}
+.conv-tbl .u{font-size:11.5px;color:var(--muted);white-space:nowrap;padding:0 6px}
+
+footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted);font-size:12.5px;line-height:1.55}
+
+@media (max-width:720px){
+  .grid{grid-template-columns:1fr 1fr}
+  .calc-grid{grid-template-columns:1fr}
+  .sig{gap:20px}
+}
+
+/* ===== Print ===== */
+@page{size:A4;margin:13mm 12mm}
+@media print{
+  body{background:#fff;font-size:12.5px}
+  header.app,footer.app,nav#tabs,.toolbar,.no-print,textarea::-webkit-resizer{display:none!important}
+  main{margin:0;padding:0;max-width:none}
+  .tab{display:none!important}
+  .tab.active{display:block!important}
+  .card{box-shadow:none;border:none;border-radius:0;padding:0 0 14px}
+  input[type=text],input[type=date],input[type=time],input[type=number],input[type=tel],select{
+    border:none;border-bottom:1px dotted #999;border-radius:0;padding:0 0 1px;font-weight:600;background:none}
+  textarea{border:none;padding:0;background:none}
+  .grid-t{font-size:10.5px}
+  .grid-t th,.grid-t td{border:1px solid #8a8a8a!important;padding:3px 4px}
+  .grid-t input,.grid-t select{font-weight:400;border-bottom:none}
+  .calc-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .calc .out{border:1px solid #999;background:#fff;border-style:solid}
+  .keep{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="app-row">
+    <div class="logo">VetTools<span class="ver">v1.0</span></div>
+    <div class="toolbar">
+      <span class="savestate" id="savestate"></span>
+      <button class="btn primary" onclick="window.print()">Печать</button>
+      <button class="btn" id="btn-export" title="Резервная копия всех разделов в JSON-файл">Экспорт</button>
+      <button class="btn" id="btn-import" title="Загрузить резервную копию из JSON-файла">Импорт</button>
+      <button class="btn danger" id="btn-clear" title="Очистить текущий раздел">Очистить раздел</button>
+      <input type="file" id="import-file" accept=".json,application/json" hidden>
+    </div>
+  </div>
+  <nav id="tabs">
+    <button data-tab="soap" class="active">Приём (SOAP)</button>
+    <button data-tab="dis">Выписка владельцу</button>
+    <button data-tab="con">Согласие</button>
+    <button data-tab="obs">Лист наблюдения</button>
+    <button data-tab="ane">Анест-лист</button>
+    <button data-tab="pro">Протоколы</button>
+    <button data-tab="nec">Некропсия</button>
+    <button data-tab="cal">Калькуляторы</button>
+    <button data-tab="dif">Анализы: было → стало</button>
+  </nav>
+</header>
+
+<main>
+<div class="banner no-print" id="banner" hidden>
+  <button class="btn sm" id="banner-ok">Понятно</button>
+  <b>VetTools</b> — один офлайн-файл: открывается с диска без интернета, ИИ не нужен.
+  Всё, что вы вводите, <b>автосохраняется в этом браузере</b> и никуда не отправляется.
+  Перенос на другой компьютер — кнопками <b>Экспорт / Импорт</b>. Печать и «Сохранить как PDF» — кнопкой <b>Печать</b> (печатается только открытая вкладка).
+</div>
+
+<!-- ============ 1. SOAP ============ -->
+<section id="tab-soap" class="tab active">
+  <div class="card">
+    <h2>Приём — шапка</h2>
+    <div class="grid">
+      <div class="f"><label for="soap-date">Дата</label><input type="date" id="soap-date"></div>
+      <div class="f"><label for="soap-owner">Владелец</label><input type="text" id="soap-owner"></div>
+      <div class="f"><label for="soap-phone">Телефон</label><input type="tel" id="soap-phone"></div>
+      <div class="f"><label for="soap-pet">Животное (кличка)</label><input type="text" id="soap-pet"></div>
+      <div class="f"><label for="soap-species">Вид</label>
+        <select id="soap-species"><option value=""></option><option>собака</option><option>кошка</option><option>грызун</option><option>птица</option><option>экзот</option><option>другое</option></select></div>
+      <div class="f"><label for="soap-breed">Порода</label><input type="text" id="soap-breed"></div>
+      <div class="f"><label for="soap-sex">Пол</label>
+        <select id="soap-sex"><option value=""></option><option>самец</option><option>самец (кастрирован)</option><option>самка</option><option>самка (стерилизована)</option></select></div>
+      <div class="f"><label for="soap-age">Возраст</label><input type="text" id="soap-age" placeholder="например, 4 года / 8 мес"></div>
+      <div class="f"><label for="soap-weight">Вес, кг</label><input type="number" id="soap-weight" step="0.01" min="0"></div>
+      <div class="f"><label for="soap-temp">Т°, °C</label><input type="number" id="soap-temp" step="0.1"></div>
+      <div class="f"><label for="soap-hr">ЧСС, уд/мин</label><input type="number" id="soap-hr"></div>
+      <div class="f"><label for="soap-rr">ЧД, /мин</label><input type="number" id="soap-rr"></div>
+      <div class="f"><label for="soap-bcs">Кондиция (BCS 1–9)</label>
+        <select id="soap-bcs"><option value=""></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>S — Субъективно <span class="sub">жалобы, анамнез, содержание, рацион, профилактика, прежнее лечение</span></h2>
+    <textarea id="soap-s" rows="6"></textarea>
+  </div>
+  <div class="card">
+    <h2>O — Объективно <span class="sub">осмотр по системам, локальный статус, анализы и исследования</span></h2>
+    <textarea id="soap-o" rows="9"></textarea>
+  </div>
+  <div class="card">
+    <h2>A — Оценка</h2>
+    <div class="grid">
+      <div class="f"><label for="soap-dx">Диагноз (рабочий / окончательный)</label><input type="text" id="soap-dx"></div>
+    </div>
+    <div class="f" style="margin-top:10px"><label for="soap-a">Проблемный список, дифференциальный диагноз</label><textarea id="soap-a" rows="5"></textarea></div>
+  </div>
+  <div class="card">
+    <h2>P — План</h2>
+    <div class="grid wide">
+      <div class="f"><label for="soap-p-dx">План диагностики</label><textarea id="soap-p-dx" rows="5"></textarea></div>
+      <div class="f"><label for="soap-p-rx">Лечение (назначения)</label><textarea id="soap-p-rx" rows="5"></textarea></div>
+      <div class="f"><label for="soap-p-adv">Рекомендации</label><textarea id="soap-p-adv" rows="5"></textarea></div>
+    </div>
+    <div class="grid" style="margin-top:10px">
+      <div class="f"><label for="soap-next">Повторный приём</label><input type="date" id="soap-next"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. Выписка владельцу ============ -->
+<section id="tab-dis" class="tab">
+  <div class="card">
+    <h2>Памятка владельцу <span class="sub">— заполнить, затем распечатать или скопировать текстом в мессенджер</span></h2>
+    <div class="grid">
+      <div class="f"><label for="dis-date">Дата</label><input type="date" id="dis-date"></div>
+      <div class="f"><label for="dis-owner">Владелец</label><input type="text" id="dis-owner"></div>
+      <div class="f"><label for="dis-phone">Телефон</label><input type="tel" id="dis-phone"></div>
+      <div class="f"><label for="dis-pet">Животное</label><input type="text" id="dis-pet"></div>
+      <div class="f"><label for="dis-info">Вид / порода / возраст</label><input type="text" id="dis-info"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Что было сегодня <span class="sub">диагноз, процедура, операция</span></h2>
+    <textarea id="dis-done" rows="4"></textarea>
+  </div>
+  <div class="card">
+    <h2>Лекарства</h2>
+    <div class="tbl-wrap">
+    <table class="grid-t" id="tbl-dis-med" data-table="dis-med">
+      <thead><tr><th style="min-width:140px">Препарат</th><th style="min-width:90px">Сколько</th><th style="min-width:110px">Как давать</th><th style="min-width:110px">Как часто</th><th style="min-width:80px">Дней</th><th class="no-print" style="width:34px"></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-dis-med"><tr>
+      <td><input type="text"></td><td><input type="text" placeholder="мг / мл / таб"></td>
+      <td><input type="text" placeholder="в рот / с едой"></td><td><input type="text" placeholder="2 раза в день"></td>
+      <td><input type="text"></td><td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <button class="btn ghost sm no-print" data-add="tbl-dis-med" type="button">+ строка</button>
+  </div>
+  <div class="card">
+    <h2>Уход и наблюдение</h2>
+    <div class="grid wide">
+      <div class="f"><label for="dis-watch">Наблюдать за</label><textarea id="dis-watch" rows="4"></textarea></div>
+      <div class="f"><label for="dis-feed">Кормление и поение</label><textarea id="dis-feed" rows="4"></textarea></div>
+      <div class="f"><label for="dis-rest">Ограничения <span style="text-transform:none;font-weight:500">(покой, попона, воротник, выгул)</span></label><textarea id="dis-rest" rows="4"></textarea></div>
+      <div class="f"><label for="dis-wound">Шов / рана (обработка)</label><textarea id="dis-wound" rows="4"></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Контроль</h2>
+    <div class="grid">
+      <div class="f"><label for="dis-next">Контрольный приём — дата</label><input type="date" id="dis-next"></div>
+      <div class="f"><label for="dis-nexttime">Время</label><input type="time" id="dis-nexttime"></div>
+      <div class="f"><label for="dis-clinic">Клиника / врач / телефон</label><input type="text" id="dis-clinic"></div>
+    </div>
+    <div class="f" style="margin-top:10px"><label for="dis-urgent">СРОЧНО к врачу, если:</label><textarea id="dis-urgent" rows="5"></textarea></div>
+  </div>
+  <div class="card no-print">
+    <div class="toolbar-row">
+      <button class="btn primary" id="btn-copy-dis" type="button">Скопировать текст владельцу</button>
+      <button class="btn" onclick="window.print()" type="button">Печать памятки</button>
+    </div>
+    <p class="hint" style="margin:8px 0 0">Текст собирается из полей выше — удобно отправить в WhatsApp/Telegram, если владельца нет на приёме лично.</p>
+  </div>
+</section>
+<!-- ============ 3. Согласие ============ -->
+<section id="tab-con" class="tab">
+  <div class="card no-print">
+    <h2>Данные для информированного согласия</h2>
+    <p class="hint">Заполните поля и отметьте манипуляции — текст документа ниже соберётся автоматически. Печать выводит только документ.</p>
+    <div class="grid">
+      <div class="f"><label for="con-date">Дата</label><input type="date" id="con-date"></div>
+      <div class="f"><label for="con-owner">ФИО владельца</label><input type="text" id="con-owner"></div>
+      <div class="f"><label for="con-doc">Документ / контакты владельца</label><input type="text" id="con-doc" placeholder="паспорт, телефон"></div>
+      <div class="f"><label for="con-pet">Кличка</label><input type="text" id="con-pet"></div>
+      <div class="f"><label for="con-species">Вид</label><input type="text" id="con-species"></div>
+      <div class="f"><label for="con-breed">Порода</label><input type="text" id="con-breed"></div>
+      <div class="f"><label for="con-sex">Пол</label><input type="text" id="con-sex"></div>
+      <div class="f"><label for="con-age">Возраст</label><input type="text" id="con-age"></div>
+      <div class="f"><label for="con-color">Окрас</label><input type="text" id="con-color"></div>
+      <div class="f"><label for="con-id">Чип / клеймо / №</label><input type="text" id="con-id"></div>
+    </div>
+  </div>
+  <div class="card no-print">
+    <h2>Манипуляции <span class="sub">— отметьте всё, на что согласуется владелец</span></h2>
+    <div class="grid wide">
+      <label class="chk"><input type="checkbox" id="con-p-diag">Диагностические процедуры (осмотр, анализы, УЗИ, рентген)</label>
+      <label class="chk"><input type="checkbox" id="con-p-prem">Премедикация и седация</label>
+      <label class="chk"><input type="checkbox" id="con-p-anest">Общая анестезия</label>
+      <label class="chk"><input type="checkbox" id="con-p-surg">Оперативное вмешательство</label>
+      <label class="chk" style="grid-column:1/-1"><input type="checkbox" id="con-p-hosp">Госпитализация / стационар (включая круглосуточное содержание)</label>
+      <label class="chk"><input type="checkbox" id="con-p-iv">Инфузионная терапия</label>
+      <label class="chk"><input type="checkbox" id="con-p-transf">Переливание крови / компонентов</label>
+      <label class="chk"><input type="checkbox" id="con-p-dent">Стоматологические манипуляции (в т.ч. удаление зубов)</label>
+      <label class="chk"><input type="checkbox" id="con-p-euth">Эвтаназия по медицинским показаниям</label>
+      <label class="chk"><input type="checkbox" id="con-p-crem">Кремация (общая / индивидуальная — подчеркнуть)</label>
+    </div>
+    <div class="grid" style="margin-top:8px">
+      <div class="f"><label for="con-surg-name">Название операции (если отмечено)</label><input type="text" id="con-surg-name"></div>
+      <div class="f"><label for="con-other">Иное (что именно)</label><input type="text" id="con-other"></div>
+      <div class="f"><label for="con-pay">Ориентир стоимости (обсуждён)</label><input type="text" id="con-pay" placeholder="например, до 12 000 ₽"></div>
+    </div>
+    <div class="f" style="margin-top:8px"><label for="con-anim">Особые условия / что обсуждалось (прогноз, альтернативы, риски конкретного пациента)</label><textarea id="con-anim" rows="3"></textarea></div>
+  </div>
+  <div class="card">
+    <h2 class="no-print">Текст согласия <span class="sub">— предпросмотр, обновляется автоматически</span></h2>
+    <div id="con-preview" class="legal"></div>
+  </div>
+</section>
+
+<!-- ============ 4. Лист наблюдения ============ -->
+<section id="tab-obs" class="tab">
+  <div class="card">
+    <h2>Лист наблюдения <span class="sub">— стационар / послеоперационное содержание</span></h2>
+    <div class="grid">
+      <div class="f"><label for="obs-date">Дата</label><input type="date" id="obs-date"></div>
+      <div class="f"><label for="obs-pet">Животное</label><input type="text" id="obs-pet"></div>
+      <div class="f"><label for="obs-owner">Владелец</label><input type="text" id="obs-owner"></div>
+      <div class="f"><label for="obs-dx">Диагноз</label><input type="text" id="obs-dx"></div>
+      <div class="f"><label for="obs-mode">Режим</label>
+        <select id="obs-mode"><option value=""></option><option>свободный</option><option>клетка</option><option>бокс</option><option>ОРИТ</option></select></div>
+      <div class="f"><label for="obs-diet">Диета / кормление</label><input type="text" id="obs-diet"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+    <table class="grid-t keep" id="tbl-obs" data-table="obs">
+      <thead><tr>
+        <th style="min-width:64px">Время</th><th style="min-width:50px">Т°</th><th style="min-width:50px">ЧСС</th><th style="min-width:50px">ЧД</th>
+        <th style="min-width:80px">Слизистые / СПК</th><th style="min-width:90px">Еда / вода</th><th style="min-width:90px">Моча / стул</th>
+        <th style="min-width:100px">Состояние, поведение</th><th style="min-width:120px">ЛС / процедуры (выполнено)</th><th style="min-width:60px">Подпись</th>
+        <th class="no-print" style="width:34px"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-obs"><tr>
+      <td><input type="time"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+      <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+      <td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <div class="toolbar-row no-print" style="margin-top:8px">
+      <button class="btn ghost sm" data-add="tbl-obs" type="button">+ 1 строка</button>
+      <button class="btn ghost sm" type="button" data-add5="tbl-obs">+ 5 строк</button>
+    </div>
+    <p class="hint">Каждая строка — один контрольный обход. Таблица умещается на A4 при печати.</p>
+  </div>
+</section>
+
+<!-- ============ 5. Анест-лист ============ -->
+<section id="tab-ane" class="tab">
+  <div class="card">
+    <h2>Анестезиологический лист — шапка</h2>
+    <div class="grid">
+      <div class="f"><label for="ane-date">Дата</label><input type="date" id="ane-date"></div>
+      <div class="f"><label for="ane-pet">Животное</label><input type="text" id="ane-pet"></div>
+      <div class="f"><label for="ane-info">Вид / порода</label><input type="text" id="ane-info"></div>
+      <div class="f"><label for="ane-age">Возраст</label><input type="text" id="ane-age"></div>
+      <div class="f"><label for="ane-sex">Пол</label><input type="text" id="ane-sex"></div>
+      <div class="f"><label for="ane-weight">Вес, кг</label><input type="number" id="ane-weight" step="0.01" min="0"></div>
+      <div class="f"><label for="ane-asa">ASA</label>
+        <select id="ane-asa"><option value=""></option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>E (экстренно)</option></select></div>
+      <div class="f"><label for="ane-proc">Плановая процедура</label><input type="text" id="ane-proc"></div>
+      <div class="f"><label for="ane-fast">Голодная диета с</label><input type="time" id="ane-fast"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Премедикация</h2>
+    <div class="tbl-wrap">
+    <table class="grid-t keep" id="tbl-ane-pre" data-table="ane-pre">
+      <thead><tr><th style="min-width:70px">Время</th><th style="min-width:160px">Препарат</th><th style="min-width:110px">Доза</th><th style="min-width:90px">Путь</th><th class="no-print" style="width:34px"></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-ane-pre"><tr>
+      <td><input type="time"></td><td><input type="text"></td><td><input type="text" placeholder="мг/кг"></td>
+      <td><input type="text" placeholder="п/к / в/м / в/в"></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <button class="btn ghost sm no-print" data-add="tbl-ane-pre" type="button">+ строка</button>
+  </div>
+  <div class="card">
+    <h2>Индукция и поддержание</h2>
+    <div class="grid wide">
+      <div class="f"><label for="ane-ind">Индукция (препарат, доза, путь)</label><textarea id="ane-ind" rows="2"></textarea></div>
+      <div class="f"><label for="ane-airway">Дыхательный путь (трубка №, ЛМ, маска)</label><textarea id="ane-airway" rows="2"></textarea></div>
+      <div class="f"><label for="ane-maint">Поддержание (агент, об.%)</label><textarea id="ane-maint" rows="2"></textarea></div>
+      <div class="f"><label for="ane-fluids">Инфузия (препарат, объём, скорость)</label><textarea id="ane-fluids" rows="2"></textarea></div>
+      <div class="f"><label for="ane-local">Регионарная / местная анальгезия</label><textarea id="ane-local" rows="2"></textarea></div>
+      <div class="f"><label for="ane-monitor">Мониторинг (апаратура)</label><textarea id="ane-monitor" rows="2" placeholder="пульсоксиметр, АД, капнограф..."></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Мониторинг <span class="sub">— запись каждые 5–10 минут</span></h2>
+    <div class="tbl-wrap">
+    <table class="grid-t" id="tbl-ane-mon" data-table="ane-mon">
+      <thead><tr>
+        <th style="min-width:64px">Время</th><th style="min-width:50px">ЧСС</th><th style="min-width:50px">ЧД</th><th style="min-width:56px">SpO2, %</th>
+        <th style="min-width:64px">АД сист.</th><th style="min-width:50px">Т°</th><th style="min-width:110px">Глубина наркоза</th>
+        <th style="min-width:70px">Анальгезия 0–3</th><th style="min-width:140px">События / вмешательства</th><th class="no-print" style="width:34px"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-ane-mon"><tr>
+      <td><input type="time"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td>
+      <td><input type="text"></td><td><input type="text"></td><td><input type="text" placeholder="поверхн./умерен./глуб."></td>
+      <td><input type="text"></td><td><input type="text"></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <div class="toolbar-row no-print" style="margin-top:8px">
+      <button class="btn ghost sm" data-add="tbl-ane-mon" type="button">+ 1 строка</button>
+      <button class="btn ghost sm" type="button" data-add5="tbl-ane-mon">+ 5 строк</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Выход из наркоза</h2>
+    <div class="grid wide">
+      <div class="f"><label for="ane-recovery">Экстубация, осложнения, послеоперационная анальгезия</label><textarea id="ane-recovery" rows="3"></textarea></div>
+    </div>
+    <div class="grid" style="margin-top:8px">
+      <div class="f"><label for="ane-sign">Анестезиолог / хирург</label><input type="text" id="ane-sign"></div>
+    </div>
+  </div>
+</section>
+<!-- ============ 6. Протоколы ============ -->
+<section id="tab-pro" class="tab">
+  <div class="card no-print">
+    <h2>Библиотека протоколов</h2>
+    <div class="toolbar-row">
+      <select id="pro-pick" style="max-width:460px"></select>
+      <button class="btn" id="pro-open" type="button">Открыть</button>
+      <button class="btn ghost" id="pro-save" type="button" title="Сохранить текущий текст в «Мои протоколы»">Сохранить как мой</button>
+      <button class="btn danger" id="pro-del" type="button" title="Удалить выбранный «мой» протокол">Удалить мой</button>
+    </div>
+    <p class="hint" style="margin:8px 0 0">Это справочные заготовки, а не стандарты лечения: дозы и схемы проверяйте и адаптируйте к пациенту и доступным препаратам. Свой текст можно править прямо ниже — он сохраняется автоматически.</p>
+  </div>
+  <div class="card">
+    <input type="text" id="pro-title" class="doc-title" placeholder="Название протокола">
+    <textarea id="pro-body" rows="22" style="font-size:14px;line-height:1.6"></textarea>
+  </div>
+</section>
+
+<!-- ============ 7. Некропсия ============ -->
+<section id="tab-nec" class="tab">
+  <div class="card">
+    <h2>Протокол патологоанатомического вскрытия — шапка</h2>
+    <div class="grid">
+      <div class="f"><label for="nec-date">Дата и время вскрытия</label><input type="text" id="nec-date" placeholder="01.10.2026, 14:30"></div>
+      <div class="f"><label for="nec-pet">Кличка / №</label><input type="text" id="nec-pet"></div>
+      <div class="f"><label for="nec-species">Вид</label><input type="text" id="nec-species"></div>
+      <div class="f"><label for="nec-breed">Порода</label><input type="text" id="nec-breed"></div>
+      <div class="f"><label for="nec-sex">Пол / кастрация</label><input type="text" id="nec-sex"></div>
+      <div class="f"><label for="nec-age">Возраст</label><input type="text" id="nec-age"></div>
+      <div class="f"><label for="nec-weight">Вес, кг</label><input type="number" id="nec-weight" step="0.01" min="0"></div>
+      <div class="f"><label for="nec-death">Обстоятельства</label>
+        <select id="nec-death"><option value=""></option><option>погибло в клинике</option><option>поступило трупом</option><option>эвтаназия</option></select></div>
+    </div>
+    <div class="f" style="margin-top:10px"><label for="nec-anamnesis">Анамнез и клиническая картина</label><textarea id="nec-anamnesis" rows="3"></textarea></div>
+  </div>
+  <div class="card">
+    <h2>Наружный осмотр</h2>
+    <p class="hint">Телосложение и упитанность, шерсть и кожный покров, слизистые, естественные отверстия, видимые травмы и выделения.</p>
+    <textarea id="nec-outer" rows="4"></textarea>
+  </div>
+  <div class="card">
+    <h2>Внутренний осмотр — по системам</h2>
+    <div class="grid wide">
+      <div class="f"><label for="nec-cav">Полости (плевральная, брюшная — содержимое)</label><textarea id="nec-cav" rows="2"></textarea></div>
+      <div class="f"><label for="nec-resp">Дыхательная система</label><textarea id="nec-resp" rows="2"></textarea></div>
+      <div class="f"><label for="nec-card">Сердце и сосуды</label><textarea id="nec-card" rows="2"></textarea></div>
+      <div class="f"><label for="nec-gi">Желудок и кишечник</label><textarea id="nec-gi" rows="2"></textarea></div>
+      <div class="f"><label for="nec-liver">Печень и желчный пузырь</label><textarea id="nec-liver" rows="2"></textarea></div>
+      <div class="f"><label for="nec-spleen">Селезёнка и лимфоузлы</label><textarea id="nec-spleen" rows="2"></textarea></div>
+      <div class="f"><label for="nec-urin">Почки и мочевыводящие пути</label><textarea id="nec-urin" rows="2"></textarea></div>
+      <div class="f"><label for="nec-repro">Половые органы</label><textarea id="nec-repro" rows="2"></textarea></div>
+      <div class="f"><label for="nec-other">Прочее (ЦНС, кости, суставы)</label><textarea id="nec-other" rows="2"></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Патологические находки</h2>
+    <div class="tbl-wrap">
+    <table class="grid-t keep" id="tbl-nec-find" data-table="nec-find">
+      <thead><tr><th style="min-width:160px">Орган / система</th><th style="min-width:280px">Патологическая находка</th><th class="no-print" style="width:34px"></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-nec-find"><tr>
+      <td><input type="text"></td><td><input type="text"></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <button class="btn ghost sm no-print" data-add="tbl-nec-find" type="button">+ строка</button>
+  </div>
+  <div class="card">
+    <h2>Итог</h2>
+    <div class="grid wide">
+      <div class="f"><label for="nec-dx">Патологоанатомический диагноз</label><textarea id="nec-dx" rows="4"></textarea></div>
+      <div class="f"><label for="nec-cause">Предположительная причина смерти</label><textarea id="nec-cause" rows="4"></textarea></div>
+      <div class="f"><label for="nec-hist">Материал на гистологию (банки №, формалин 10%)</label><textarea id="nec-hist" rows="4"></textarea></div>
+    </div>
+    <div class="grid" style="margin-top:8px">
+      <div class="f"><label for="nec-sign">Врач (вскрытие проводил)</label><input type="text" id="nec-sign"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. Калькуляторы ============ -->
+<section id="tab-cal" class="tab">
+  <p class="hint" style="margin:0 0 12px">Расчёты справочные: результат всегда сверяйте с инструкцией к препарату и клинической ситуацией. Вес — в кг.</p>
+  <div class="calc-grid">
+    <div class="card calc">
+      <h2>1 · Доза препарата</h2>
+      <div class="grid">
+        <div class="f"><label for="cal1-w">Вес, кг</label><input type="number" id="cal1-w" step="0.01" min="0"></div>
+        <div class="f"><label for="cal1-dose">Доза, мг/кг</label><input type="number" id="cal1-dose" step="0.01" min="0"></div>
+        <div class="f"><label for="cal1-conc">Концентрация, мг/мл</label><input type="number" id="cal1-conc" step="0.01" min="0" placeholder="если известна"></div>
+        <div class="f"><label for="cal1-int">Интервал, ч</label><input type="number" id="cal1-int" min="0" placeholder="напр., 12"></div>
+      </div>
+      <div class="out" id="cal1-out">—</div>
+    </div>
+    <div class="card calc">
+      <h2>2 · Инфузия</h2>
+      <div class="grid">
+        <div class="f"><label for="cal2-w">Вес, кг</label><input type="number" id="cal2-w" step="0.01" min="0"></div>
+        <div class="f"><label for="cal2-def">Дегидратация, %</label><input type="number" id="cal2-def" step="0.5" min="0" max="15" value="5"></div>
+        <div class="f"><label for="cal2-maint">Поддержание, мл/кг/сут</label><input type="number" id="cal2-maint" min="0" value="50"></div>
+        <div class="f"><label for="cal2-drop">Система, гтт/мл</label>
+          <select id="cal2-drop"><option value="60">60 (инфузомат)</option><option value="20" selected>20 (стандарт)</option><option value="15">15</option><option value="10">10</option></select></div>
+        <div class="f"><label for="cal2-h">Дефицит восполнить за, ч</label><input type="number" id="cal2-h" min="1" value="6"></div>
+      </div>
+      <div class="out" id="cal2-out">—</div>
+    </div>
+    <div class="card calc">
+      <h2>3 · Энергия (RER / MER)</h2>
+      <div class="grid">
+        <div class="f"><label for="cal3-w">Вес, кг</label><input type="number" id="cal3-w" step="0.01" min="0"></div>
+        <div class="f"><label for="cal3-sp">Вид</label>
+          <select id="cal3-sp"><option value="dog">собака</option><option value="cat">кошка</option></select></div>
+        <div class="f" style="grid-column:1/-1"><label for="cal3-f">Физиологический статус</label>
+          <select id="cal3-f">
+            <optgroup label="Собака">
+              <option value="3.0">щенок до 4 мес (×3.0)</option>
+              <option value="2.0">щенок 4–12 мес (×2.0)</option>
+              <option value="1.8">взрослая, интактная (×1.8)</option>
+              <option value="1.6" selected>взрослая, стерилизованная (×1.6)</option>
+              <option value="1.0">снижение веса (×1.0)</option>
+              <option value="3.0">интенсивная нагрузка (×3.0)</option>
+            </optgroup>
+            <optgroup label="Кошка">
+              <option value="2.5">котёнок (×2.5)</option>
+              <option value="1.4">взрослая, интактная (×1.4)</option>
+              <option value="1.2">взрослая, стерилизованная (×1.2)</option>
+              <option value="0.8">снижение веса (×0.8)</option>
+              <option value="1.1">пожилая (×1.1)</option>
+            </optgroup>
+          </select></div>
+        <div class="f"><label for="cal3-kc">Калорийность корма, ккал/100 г</label><input type="number" id="cal3-kc" min="0" placeholder="необязательно"></div>
+        <div class="f"><label for="cal3-meals">Кормлений в сутки</label><input type="number" id="cal3-meals" min="1" value="2"></div>
+      </div>
+      <div class="out" id="cal3-out">—</div>
+    </div>
+    <div class="card calc">
+      <h2>4 · Площадь поверхности тела (BSA)</h2>
+      <div class="grid">
+        <div class="f"><label for="cal4-w">Вес, кг</label><input type="number" id="cal4-w" step="0.01" min="0"></div>
+        <div class="f"><label for="cal4-sp">Вид</label>
+          <select id="cal4-sp"><option value="dog">собака</option><option value="cat">кошка</option></select></div>
+        <div class="f"><label for="cal4-dose">Доза, мг/м²</label><input type="number" id="cal4-dose" step="0.01" min="0" placeholder="необязательно"></div>
+      </div>
+      <div class="out" id="cal4-out">—</div>
+    </div>
+    <div class="card calc" style="grid-column:1/-1">
+      <h2>5 · Конвертер единиц <span class="sub">СИ ↔ условные — вводите в любую из колонок</span></h2>
+      <div class="tbl-wrap">
+      <table class="grid-t conv-tbl keep" id="conv-tbl">
+        <thead><tr><th>Показатель</th><th style="width:110px">СИ, ед.</th><th style="width:120px">значение</th><th style="width:120px">значение</th><th style="width:110px">условные, ед.</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      </div>
+    </div>
+    <div class="card calc">
+      <h2>6 · Кондиция (BCS) и снижение веса</h2>
+      <div class="grid">
+        <div class="f"><label for="cal6-w">Текущий вес, кг</label><input type="number" id="cal6-w" step="0.01" min="0"></div>
+        <div class="f"><label for="cal6-bcs">BCS (1–9)</label>
+          <select id="cal6-bcs"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></div>
+        <div class="f"><label for="cal6-sp">Вид</label>
+          <select id="cal6-sp"><option value="dog">собака</option><option value="cat">кошка</option></select></div>
+      </div>
+      <div class="out" id="cal6-out">—</div>
+    </div>
+  </div>
+</section>
+<!-- ============ 9. Анализы: было → стало ============ -->
+<section id="tab-dif" class="tab">
+  <div class="card">
+    <h2>Анализы: было → стало <span class="sub">— сравнение двух исследований</span></h2>
+    <div class="grid">
+      <div class="f"><label for="dif-pet">Пациент</label><input type="text" id="dif-pet"></div>
+      <div class="f"><label for="dif-info">Вид / порода / возраст</label><input type="text" id="dif-info"></div>
+      <div class="f"><label for="dif-date1">Дата «было»</label><input type="date" id="dif-date1"></div>
+      <div class="f"><label for="dif-date2">Дата «стало»</label><input type="date" id="dif-date2"></div>
+      <div class="f"><label for="dif-lab">Лаборатория / исследование</label><input type="text" id="dif-lab"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+    <table class="grid-t" id="tbl-dif" data-table="dif">
+      <thead><tr>
+        <th style="min-width:150px">Показатель</th><th style="min-width:60px">Ед.</th>
+        <th style="min-width:70px">Норма от</th><th style="min-width:70px">Норма до</th>
+        <th style="min-width:70px">Было</th><th style="min-width:70px">Стало</th>
+        <th style="min-width:90px">Динамика</th><th style="min-width:110px">Статус</th>
+        <th class="no-print" style="width:34px"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-dif"><tr>
+      <td><input type="text" class="d-name"></td><td><input type="text" class="d-unit"></td>
+      <td><input type="number" class="d-lo" step="any"></td><td><input type="number" class="d-hi" step="any"></td>
+      <td><input type="number" class="d-v1" step="any"></td><td><input type="number" class="d-v2" step="any"></td>
+      <td class="d-dyn" style="padding-top:9px">—</td><td class="d-st" style="padding-top:6px"></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <div class="toolbar-row no-print" style="margin-top:8px">
+      <button class="btn ghost sm" data-add="tbl-dif" type="button">+ строка</button>
+      <button class="btn ghost sm" type="button" data-add5="tbl-dif">+ 10 строк</button>
+    </div>
+    <p class="hint">Статус считается по значению «стало» и норме; динамика — процент изменения от «было» к «стало». Пустые поля просто игнорируются.</p>
+  </div>
+</section>
+</main>
+
+<footer class="app">
+  VetTools v1.0 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
+  расчёты справочные и не заменяют клинического суждения · часть экосистемы VetInSilico
+</footer>
+<script>
+"use strict";
+/* ================= VetTools v1.0 — ядро ================= */
+var VERSION = "1.0.0";
+var LS_PREFIX = "vt:" + VERSION + ":";
+var TAB_IDS = ["soap","dis","con","obs","ane","pro","nec","cal","dif"];
+var $ = function(s,r){ return (r||document).querySelector(s); };
+var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+var byId = function(id){ return document.getElementById(id); };
+var num = function(v){ var n = parseFloat(String(v).replace(",",".")); return isFinite(n) ? n : null; };
+var fmt = function(n,d){ if(!isFinite(n)) return "—"; d=(d==null?2:d); return n.toLocaleString("ru-RU",{maximumFractionDigits:d}); };
+var today = function(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); };
+
+/* ---------- вкладки ---------- */
+var activeTab = "soap";
+function activateTab(id){
+  if(id!==activeTab) saveTab(activeTab, true); /* флаш отложенного сохранения прежней вкладки */
+  activeTab = id;
+  $$("#tabs button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab===id); });
+  TAB_IDS.forEach(function(t){ byId("tab-"+t).classList.toggle("active", t===id); });
+  $$("textarea", byId("tab-"+id)).forEach(autosize);
+  try{ localStorage.setItem(LS_PREFIX+"lasttab", id); }catch(e){}
+}
+$("#tabs").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-tab]");
+  if(b) activateTab(b.dataset.tab);
+});
+
+/* ---------- автосохранение ---------- */
+var saveTimer = null;
+function markSaved(){
+  var el = byId("savestate"), d = new Date();
+  el.textContent = "Сохранено " + ("0"+d.getHours()).slice(-2) + ":" + ("0"+d.getMinutes()).slice(-2);
+}
+function collectTab(tab){
+  var data = {};
+  $$("input[id],select[id],textarea[id]", tab).forEach(function(el){
+    data[el.id] = (el.type==="checkbox") ? el.checked : el.value;
+  });
+  $$("table[data-table]", tab).forEach(function(t){
+    data["@"+t.dataset.table] = $$("tbody tr", t).map(function(tr){
+      return $$("input,select,textarea", tr).map(function(c){ return c.value; });
+    });
+  });
+  return data;
+}
+function applyTab(tab, data){
+  if(!data) return;
+  $$("input[id],select[id],textarea[id]", tab).forEach(function(el){
+    if(!(el.id in data)) return;
+    var v = data[el.id];
+    if(el.type==="checkbox") el.checked = !!v; else el.value = v;
+  });
+  $$("table[data-table]", tab).forEach(function(t){
+    var rows = data["@"+t.dataset.table];
+    if(Array.isArray(rows)){
+      var tb = $("tbody", t); tb.innerHTML = "";
+      rows.forEach(function(vals){
+        var tr = addRow(t.id, true);
+        if(!tr) return;
+        $$("input,select,textarea", tr).forEach(function(c,i){ if(vals && i<vals.length) c.value = vals[i]; });
+      });
+    }
+  });
+  $$("textarea", tab).forEach(autosize);
+}
+function saveTab(id, silent){
+  try{
+    localStorage.setItem(LS_PREFIX+id, JSON.stringify(collectTab(byId("tab-"+id))));
+    if(!silent) markSaved();
+  }catch(e){ byId("savestate").textContent = "Не сохранено (память браузера)"; }
+}
+function saveSoon(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){ saveTab(activeTab); recalcActive(); }, 350);
+}
+function restoreTab(id){
+  var raw = null;
+  try{ raw = localStorage.getItem(LS_PREFIX+id); }catch(e){}
+  if(raw){ try{ applyTab(byId("tab-"+id), JSON.parse(raw)); return true; }catch(e){} }
+  return false;
+}
+
+/* ---------- таблицы ---------- */
+function tplFor(tableId){
+  var t = byId(tableId);
+  return $('template[data-for="'+tableId+'"]', t.closest(".card") || document);
+}
+function addRow(tableId, quiet){
+  var tpl = tplFor(tableId);
+  var t = byId(tableId);
+  if(!tpl || !t) return null;
+  var tr = tpl.content.firstElementChild.cloneNode(true);
+  $("tbody", t).appendChild(tr);
+  if(!quiet){ saveSoon(); }
+  return tr;
+}
+function addRows(tableId, n){ for(var i=0;i<n;i++) addRow(tableId, true); saveSoon(); recalcActive(); }
+document.addEventListener("click", function(e){
+  var add = e.target.closest("[data-add]");
+  if(add){ addRows(add.dataset.add, 1); return; }
+  var add5 = e.target.closest("[data-add5]");
+  if(add5){ var n = add5.dataset.add5==="tbl-dif" ? 10 : 5; addRows(add5.dataset.add5, n); return; }
+  var del = e.target.closest(".rowbtn");
+  if(del){
+    var tr = del.closest("tr");
+    if(tr){ tr.parentNode.removeChild(tr); saveSoon(); recalcActive(); }
+  }
+});
+
+/* ---------- autosize textarea ---------- */
+function autosize(t){
+  if(!t) return;
+  if(t.offsetParent === null){ t.style.height = ""; return; } /* скрытая вкладка — размер посчитаем при показе */
+  t.style.height = "auto";
+  t.style.height = (t.scrollHeight + 2) + "px";
+}
+
+/* ---------- события ввода ---------- */
+document.addEventListener("input", function(e){
+  if(e.target.matches("textarea")) autosize(e.target);
+  saveSoon();
+});
+document.addEventListener("change", function(e){
+  if(e.target.matches("select")) saveSoon();
+});
+
+/* ---------- стартовые значения ---------- */
+var DATE_IDS = ["soap-date","dis-date","con-date","obs-date","ane-date"];
+var DIS_URGENT_DEFAULT = "вялость более 12–24 часов; отказ от еды или воды; многократная рвота или диарея; кровотечение; выделения, отёк, покраснение в области шва; расхождение швов; владелец не может предотвратить вылизывание шва; бледные или синюшные слизистые; тяжёлое или частое дыхание; судороги, потеря сознания; выраженная боль (скулит, не даёт трогать).";
+function seedDefaults(id){
+  var tab = byId("tab-"+id);
+  DATE_IDS.forEach(function(did){ var el = byId(did); if(el && !el.value) el.value = today(); });
+  if(id==="dis" && !byId("dis-urgent").value) byId("dis-urgent").value = DIS_URGENT_DEFAULT;
+  if(id==="obs" && !$("tbody tr", byId("tbl-obs"))) addRows("tbl-obs", 6);
+  if(id==="ane"){
+    if(!$("tbody tr", byId("tbl-ane-pre"))) addRows("tbl-ane-pre", 3);
+    if(!$("tbody tr", byId("tbl-ane-mon"))) addRows("tbl-ane-mon", 8);
+  }
+  if(id==="dis" && !$("tbody tr", byId("tbl-dis-med"))) addRows("tbl-dis-med", 4);
+  if(id==="dif" && !$("tbody tr", byId("tbl-dif"))) addRows("tbl-dif", 6);
+  if(id==="nec" && !$("tbody tr", byId("tbl-nec-find"))) addRows("tbl-nec-find", 4);
+}
+function resetTabControls(id){
+  var tab = byId("tab-"+id);
+  $$("input[id],select[id],textarea[id]", tab).forEach(function(el){
+    if(el.type==="checkbox") el.checked = false; else el.value = "";
+  });
+  $$("table[data-table]", tab).forEach(function(t){ $("tbody", t).innerHTML = ""; });
+  $$("textarea", tab).forEach(function(t){ t.style.height = ""; });
+}
+function clearActiveTab(){
+  var id = activeTab;
+  var names = {soap:"Приём (SOAP)",dis:"Выписка владельцу",con:"Согласие",obs:"Лист наблюдения",ane:"Анест-лист",pro:"Протоколы",nec:"Некропсия",cal:"Калькуляторы",dif:"Анализы"};
+  if(!confirm('Очистить раздел «'+names[id]+'»?\n\nДействие необратимо. Сначала можно сделать «Экспорт» — он сохранит резервную копию всех разделов.')) return;
+  try{ localStorage.removeItem(LS_PREFIX+id); }catch(e){}
+  resetTabControls(id);
+  seedDefaults(id);
+  if(id==="pro") proLoadSelected();
+  saveTab(id);
+  recalcActive();
+}
+byId("btn-clear").addEventListener("click", clearActiveTab);
+
+/* ---------- баннер первого запуска ---------- */
+try{
+  if(!localStorage.getItem(LS_PREFIX+"seen")){ byId("banner").hidden = false; }
+}catch(e){}
+byId("banner-ok").addEventListener("click", function(){
+  byId("banner").hidden = true;
+  try{ localStorage.setItem(LS_PREFIX+"seen","1"); }catch(e){}
+});
+/* ================= калькуляторы ================= */
+function rer(w){
+  if(!(w>0)) return null;
+  return (w>=2 && w<=45) ? 30*w+70 : 70*Math.pow(w,0.75);
+}
+function calc1(){
+  var w=num(byId("cal1-w").value), d=num(byId("cal1-dose").value), c=num(byId("cal1-conc").value), it=num(byId("cal1-int").value);
+  var out = byId("cal1-out");
+  if(!(w>0) || !(d>=0)){ out.innerHTML="Введите вес и дозу."; return; }
+  var mg = w*d, s = "Разовая доза: <b>"+fmt(mg)+" мг</b>";
+  if(c>0) s += " = <b>"+fmt(mg/c, 2)+" мл</b> (при "+fmt(c)+" мг/мл)";
+  if(it>0 && d>0) s += "<br>Суточно: "+fmt(mg*24/it)+" мг"+(c>0?" = "+fmt(mg*24/it/c)+" мл":"")+" <span class='dim'>(каждые "+fmt(it,1)+" ч)</span>";
+  if(!(c>0)) s += "<br><span class='dim'>Укажите концентрацию препарата — переведу в мл.</span>";
+  out.innerHTML = s;
+}
+function calc2(){
+  var w=num(byId("cal2-w").value), p=num(byId("cal2-def").value), m=num(byId("cal2-maint").value),
+      f=num(byId("cal2-drop").value), h=num(byId("cal2-h").value);
+  var out = byId("cal2-out");
+  if(!(w>0)){ out.innerHTML="Введите вес."; return; }
+  var def = (p>0? p*w*10 : 0);           // мл: % × кг × 10
+  var maint = (m>0? m*w : 40*w);          // мл/сут
+  var total = def + maint;
+  var s = "Дефицит ("+fmt(p||0,1)+"%): <b>"+fmt(def,0)+" мл</b> · поддержание: <b>"+fmt(maint,0)+" мл/сут</b><br>";
+  if(def>0 && h>0){
+    var sp = (def + maint*h/24)/h;
+    s += "Первые "+fmt(h,0)+" ч: <b>"+fmt(sp,0)+" мл/ч</b> ≈ <b>"+fmt(sp*f/60,1)+" гтт/мин</b> ("+fmt(f,0)+" гтт/мл)<br>";
+    s += "Далее поддержание: "+fmt(maint/24,0)+" мл/ч ≈ "+fmt(maint/24*f/60,1)+" гтт/мин<br>";
+  } else {
+    s += "Скорость: <b>"+fmt(total/24,0)+" мл/ч</b> ≈ <b>"+fmt(total/24*f/60,1)+" гтт/мин</b><br>";
+  }
+  s += "<span class='dim'>Всего за сутки: "+fmt(total,0)+" мл. Дефицит обычно восполняют за 4–12 ч; при сердечной/почечной патологии скорость и объём корректирует врач.</span>";
+  out.innerHTML = s;
+}
+function calc3(){
+  var w=num(byId("cal3-w").value), f=num(byId("cal3-f").value), kc=num(byId("cal3-kc").value), meals=num(byId("cal3-meals").value)||2;
+  var out = byId("cal3-out");
+  var r = rer(w);
+  if(!r){ out.innerHTML="Введите вес."; return; }
+  var mer = r*f;
+  var s = "RER: <b>"+fmt(r,0)+" ккал/сут</b> · MER: <b>"+fmt(mer,0)+" ккал/сут</b> (×"+fmt(f,1)+")";
+  if(kc>0){
+    var g = mer/kc*100;
+    s += "<br>Корма: <b>"+fmt(g,0)+" г/сут</b>";
+    if(meals>1) s += " → по <b>"+fmt(g/meals,0)+" г</b> × "+fmt(meals,0)+" кормления";
+  } else {
+    s += "<br><span class='dim'>Укажите калорийность корма (ккал/100 г) — переведу в граммы.</span>";
+  }
+  out.innerHTML = s;
+}
+function calc4(){
+  var w=num(byId("cal4-w").value), sp=byId("cal4-sp").value, d=num(byId("cal4-dose").value);
+  var out = byId("cal4-out");
+  if(!(w>0)){ out.innerHTML="Введите вес."; return; }
+  var k = (sp==="dog") ? 10.1 : 10.0;
+  var bsa = k*Math.pow(w*1000, 2/3)/10000;
+  var s = "BSA: <b>"+fmt(bsa,3)+" м²</b> <span class='dim'>("+(sp==="dog"?"собака":"кошка")+")</span>";
+  if(d>0) s += "<br>Доза "+fmt(d)+" мг/м² = <b>"+fmt(bsa*d)+" мг</b>";
+  out.innerHTML = s;
+}
+function calc6(){
+  var w=num(byId("cal6-w").value), b=num(byId("cal6-bcs").value), sp=byId("cal6-sp").value;
+  var out = byId("cal6-out");
+  if(!(w>0)){ out.innerHTML="Введите текущий вес."; return; }
+  var s;
+  if(b==5){
+    s = "BCS 5 — идеальная кондиция, целевой вес: <b>"+fmt(w)+" кг</b>. Поддерживайте текущий рацион (MER ×1.6 — собака, ×1.2 — кошка).";
+  } else if(b>5){
+    var target = w/(1+0.1*(b-5));
+    var excess = w-target;
+    var kcal = rer(target) * (sp==="dog"?1.0:0.8);
+    s = "Избыточная масса: ≈ <b>"+fmt(excess,1)+" кг</b>. Целевой вес: <b>"+fmt(target,1)+" кг</b>.<br>";
+    s += "Рацион на снижение: ≈ <b>"+fmt(kcal,0)+" ккал/сут</b> (RER целевого веса ×"+(sp==="dog"?"1.0":"0.8")+").<br>";
+    s += "<span class='dim'>Снижение — 1–2% массы в неделю, без голодания. Каждая ступень BCS выше 5 ≈ +10% массы.</span>";
+  } else {
+    if(b<=2){
+      s = "BCS "+b+" — выраженный дефицит массы / истощение. Нужен индивидуальный план откорма и поиск причины; расчёт по формуле здесь ненадёжен.";
+    } else {
+      var target2 = w/(1-0.1*(5-b));
+      s = "Дефицит массы: до идеала не хватает ≈ <b>"+fmt(target2-w,1)+" кг</b> (ориентир).<br>";
+      s += "Набор — плавно, 0.5–1% массы в неделю; сначала исключите паразитов, мальабсорбцию, хронические болезни.";
+    }
+  }
+  out.innerHTML = s;
+}
+
+/* ---------- конвертер единиц ---------- */
+var CONV = [
+  ["Глюкоза","ммоль/л","мг/дл",18.016],
+  ["Креатинин","мкмоль/л","мг/дл",1/88.4],
+  ["Мочевина","ммоль/л","BUN, мг/дл",2.801],
+  ["Билирубин общий","мкмоль/л","мг/дл",1/17.104],
+  ["Холестерин","ммоль/л","мг/дл",38.67],
+  ["Триглицериды","ммоль/л","мг/дл",88.57],
+  ["Кальций","ммоль/л","мг/дл",4.008],
+  ["Фосфор","ммоль/л","мг/дл",3.097],
+  ["Альбумин","г/л","г/дл",0.1],
+  ["Общий белок","г/л","г/дл",0.1],
+  ["Гемоглобин","г/л","г/дл",0.1],
+  ["Натрий, калий, хлор","ммоль/л","мэкв/л",1]
+];
+function buildConverter(){
+  var tb = $("#conv-tbl tbody");
+  CONV.forEach(function(row,i){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>"+row[0]+"</td><td class='u'>"+row[1]+"</td>"+
+      "<td><input type='number' step='any' id='cv-si-"+i+"'></td>"+
+      "<td><input type='number' step='any' id='cv-x-"+i+"'></td>"+
+      "<td class='u'>"+row[2]+"</td>";
+    tb.appendChild(tr);
+    (function(i){
+      var si=byId("cv-si-"+i), x=byId("cv-x-"+i), f=CONV[i][3];
+      var round3=function(v){ return String(Math.round(v*1000)/1000); };
+      si.addEventListener("input", function(){ var v=num(si.value); x.value = v==null?"":round3(v*f); });
+      x.addEventListener("input", function(){ var v=num(x.value); si.value = v==null?"":round3(v/f); });
+    })(i);
+  });
+}
+
+/* ---------- анализы: было → стало ---------- */
+function recalcDiffRow(tr){
+  var lo=num($(".d-lo",tr).value), hi=num($(".d-hi",tr).value),
+      v1=num($(".d-v1",tr).value), v2=num($(".d-v2",tr).value);
+  var dyn = $(".d-dyn",tr), st = $(".d-st",tr);
+  var t1="—", cls="";
+  if(v1!=null && v2!=null && v1!==0){
+    var d=(v2-v1)/Math.abs(v1)*100;
+    if(Math.abs(d)<0.05) t1="→ без изменений";
+    else t1=(d>0?"▲ +":"▼ ")+fmt(d,1)+"%";
+    cls = d>0.05 ? "color:var(--bad)" : d<-0.05 ? "color:var(--accent)" : "";
+  }
+  dyn.textContent = t1;
+  dyn.style.cssText = "padding-top:9px;"+(cls?"font-weight:700;"+cls:"");
+  var badge = "<span class='badge dim'>—</span>";
+  if(v2!=null && lo!=null && hi!=null){
+    if(v2<lo) badge = "<span class='badge info-badge' style='background:#e8f0fe;color:#1a56b0'>ниже нормы</span>";
+    else if(v2>hi) badge = "<span class='badge bad'>выше нормы</span>";
+    else badge = "<span class='badge ok'>в норме</span>";
+  } else if(v2!=null && lo!=null){
+    badge = (v2<lo) ? "<span class='badge' style='background:#e8f0fe;color:#1a56b0'>ниже нормы</span>" : "<span class='badge ok'>в норме</span>";
+  } else if(v2!=null && hi!=null){
+    badge = (v2>hi) ? "<span class='badge bad'>выше нормы</span>" : "<span class='badge ok'>в норме</span>";
+  }
+  st.innerHTML = badge;
+}
+function recalcDiff(){ $$("tr", $("#tbl-dif tbody")).forEach(recalcDiffRow); }
+
+/* ---------- протоколы ---------- */
+var PRO_PRESETS = [
+ {title:"Анестезия: стандартный протокол (собака, ASA I–II)", body:
+"ПРЕМЕДИКАЦИЯ (за 15–30 мин):\n• ацепромазин 0.02–0.05 мг/кг в/м или п/к (у пожилых — снизить)\n• буторфанол 0.2–0.4 мг/кг в/м\nИНДУКЦИЯ:\n• пропофол 2–4 мг/кг в/в медленно (предварительно катетер, предоксигенация 3–5 мин)\nПОДДЕРЖАНИЕ:\n• изофлюран 1–2.5 об.% (дозировать по глубине наркоза)\n• инфузия: NaCl 0.9% или Рингера 5–10 мл/кг/ч\nМОНИТОРИНГ: ЧСС, ЧД, SpO2, АД (сист. ≥ 90 мм рт.ст.), Т° (подогрев), рефлексы\nАНАЛЬГЕЗИЯ ПОСЛЕ: НПВС (по показаниям и статусу почек) + опиоид первые 12–24 ч\n⚠ Дозы — ориентир; корректировать по виду, возрасту, ASA и препаратам в наличии."},
+ {title:"Стерилизация кошки: день операции и после", body:
+"ДО: голодная диета 8–12 ч (вода ок), премедикация, катетер, индукция пропофол/альфаксалон, интубация, поддержание изофлюраном, местная блокада линии шва (лидокаин 1–2 мг/кг).\nОПЕРАЦИЯ: овариогистерэктомия срединным доступом.\nПОСЛЕ: анальгезия 2–3 сут (мелоксикам 0.05–0.1 мг/кг/сут п/о при нормальных почках ИЛИ другой НПВС по протоколу), попона/воротник, покой 5–7 дней.\nКОНТРОЛЬ: шов ежедневно; снятие швов на 10–14 день (если не рассасывающиеся).\nВЛАДЕЛЬЦУ: не давать вылизывать, следить за аппетитом/мочеиспусканием в первые сутки, срочно к врачу — отёк/выделения/расхождение шва, вялость > 24 ч."},
+ {title:"Кастрация собаки: день операции и после", body:
+"ДО: голодная диета 8–12 ч, премедикация, катетер, индукция, интубация, изофлюран, местная блокада семенного канатика (лидокаин до 2 мг/кг суммарно).\nОПЕРАЦИЯ: открытая/закрытая кастрация по технике и размеру.\nПОСЛЕ: анальгезия 3–5 сут (НПВС по статусу), воротник, покой 7–10 дней (поводок, без прыжков).\nКОНТРОЛЬ: шов ежедневно, отёк мошонки — норма первые 2–3 дня; снятие швов 10–14 дней.\nВЛАДЕЛЬЦУ: срочно к врачу — кровотечение, нарастающий отёк, расхождение шва, вялость > 24–48 ч."},
+ {title:"Вакцинация: базовые графики", body:
+"ЩЕНКИ (собаки): первая в 8–9 нед (DHPPi + Lepto), повтор в 12 нед (DHPPi + Lepto + бешенство), ревакцинация в 12 мес, далее — по схеме производителя (обычно ежегодно или раз в 3 года для ядра).\nКОТЯТА: первая в 8–9 нед (Panleuk + Calici + Herpes), повтор в 12 нед (+ бешенство), ревакцинация в 12 мес.\nПЕРЕД: дегельминтизация за 7–10 дней, клинически здоровы, температура в норме.\nПРИМЕЧАНИЕ: точный график зависит от препарата и эпидемиологической ситуации."},
+ {title:"Дегельминтизация: базовая схема", body:
+"ЩЕНКИ/КОТЯТА: первые обработки с 2–3 нед возраста, каждые 2 нед до 3 мес, далее ежемесячно до 6 мес.\nВЗРОСЛЫЕ: планово каждые 3 мес (препараты широкого спектра по весу).\nПЕРЕД ВАКЦИНАЦИЕЙ: за 7–10 дней.\nОТ ДИРОФИЛЯРИЙ (в эндемичных регионах): ежемесячно с весны по осень + тест на антиген 1–2 раза в год.\n⚠ Дозировка — строго по весу; читайте действующее вещество, а не название."},
+ {title:"Инфузия при дегидратации: стартовая схема", body:
+"ОЦЕНКА: % дегидратации по анамнезу, тургору, слизистым, глазным яблокам (5% = тургор снижен, 10–12% = тургор резко снижен, глаза запавшие, СПК > 2 с).\nОБЪЁМ: дефицит (мл) = % × вес(кг) × 10 + поддержание 40–60 мл/кг/сут + потери (рвота/диарея — по факту).\nРЕЖИМ: дефицит восполнить за 4–12 ч, поддержание равномерно за сутки. Старт: Рингера лактат / Рингера.\nКОНТРОЛЬ: диурез, вес 2 раза в сутки, слизистые, ЧСС/ЧД; при сердечной/почечной патологии — скорость и объём снижать, ЕЩЁ осторожнее при гипернатриемии.\n⚠ Это стартовая схема: объёмы и скорость корректирует врач по данным осмотра и анализов."},
+ {title:"Послеоперационное наблюдение (первый день)", body:
+"1-е 2–4 ч: каждые 15–30 мин — ЧСС, ЧД, Т°, слизистые, поведение, кровотечение из раны.\nТ°: грелки при < 37.0 °C (осторожно, без перегрева), снять при 38.0+.\nБОЛЬ: шкала 0–3, при 2+ — дополнительная анальгезия по протоколу (опиоид ± НПВС, если нет противопоказаний).\nВОДА: с 2–4 ч после экстубации малыми порциями; корм — с вечера или следующего утра (по процедуре).\nПЕРЕД ВЫПИСКОЙ: аппетит, самостоятельное мочеиспускание, стабильные vitals, анальгезия назначена, памятка владельцу распечатана."}
+];
+var proCustoms = [];
+function proReadCustoms(){
+  try{ proCustoms = JSON.parse(localStorage.getItem(LS_PREFIX+"pro-customs")||"[]")||[]; }catch(e){ proCustoms=[]; }
+}
+function proWriteCustoms(){ try{ localStorage.setItem(LS_PREFIX+"pro-customs", JSON.stringify(proCustoms)); }catch(e){} }
+function proRebuildPick(){
+  var sel = byId("pro-pick");
+  sel.innerHTML = "";
+  PRO_PRESETS.forEach(function(p,i){
+    var o=document.createElement("option"); o.value="base:"+i; o.textContent=p.title; sel.appendChild(o);
+  });
+  if(proCustoms.length){
+    var g=document.createElement("optgroup"); g.label="Мои протоколы";
+    proCustoms.forEach(function(p,i){
+      var o=document.createElement("option"); o.value="my:"+i; o.textContent=p.title; g.appendChild(o);
+    });
+    sel.appendChild(g);
+  }
+}
+function proLoadSelected(){
+  var v = byId("pro-pick").value||"base:0", kind=v.split(":")[0], idx=+v.split(":")[1];
+  var p = (kind==="my") ? proCustoms[idx] : PRO_PRESETS[idx];
+  if(p){ byId("pro-title").value=p.title; byId("pro-body").value=p.body; autosize(byId("pro-body")); saveTab("pro"); }
+}
+byId("pro-open").addEventListener("click", proLoadSelected);
+byId("pro-save").addEventListener("click", function(){
+  var t=byId("pro-title").value.trim(), b=byId("pro-body").value.trim();
+  if(!t){ alert("Сначала укажите название протокола."); return; }
+  proCustoms.push({title:t, body:b});
+  proWriteCustoms(); proRebuildPick();
+  byId("pro-pick").value = "my:"+(proCustoms.length-1);
+  alert("Сохранено в «Мои протоколы» (в памяти этого браузера).");
+});
+byId("pro-del").addEventListener("click", function(){
+  var v=byId("pro-pick").value||"";
+  if(v.indexOf("my:")!==0){ alert("Выберите в списке «мой» протокол (в группе «Мои протоколы»)."); return; }
+  var i=+v.split(":")[1];
+  if(!confirm("Удалить протокол «"+proCustoms[i].title+"»?")) return;
+  proCustoms.splice(i,1); proWriteCustoms(); proRebuildPick();
+});
+
+/* ---------- согласие: сборка текста ---------- */
+function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function conProcList(){
+  var items=[];
+  if(byId("con-p-diag").checked) items.push("диагностические процедуры (осмотр, лабораторные исследования, УЗИ, рентгенография и др.)");
+  if(byId("con-p-prem").checked) items.push("премедикация и седация");
+  if(byId("con-p-anest").checked) items.push("общая анестезия");
+  if(byId("con-p-surg").checked) items.push("оперативное вмешательство"+(byId("con-surg-name").value?": «"+esc(byId("con-surg-name").value)+"»":""));
+  if(byId("con-p-hosp").checked) items.push("госпитализация / содержание в стационаре, включая круглосуточное");
+  if(byId("con-p-iv").checked) items.push("инфузионная терапия");
+  if(byId("con-p-transf").checked) items.push("переливание крови и её компонентов");
+  if(byId("con-p-dent").checked) items.push("стоматологические манипуляции, включая удаление зубов");
+  if(byId("con-p-euth").checked) items.push("эвтаназия по медицинским показаниям");
+  if(byId("con-p-crem").checked) items.push("кремация (общая / индивидуальная — подчеркнуть)");
+  if(byId("con-other").value.trim()) items.push(esc(byId("con-other").value.trim()));
+  return items;
+}
+function buildConsent(){
+  var list = conProcList();
+  var petLine = "Животное: "+[byId("con-species").value, byId("con-breed").value, byId("con-pet").value ? "кличка «"+byId("con-pet").value+"»" : "",
+    byId("con-sex").value, byId("con-age").value, byId("con-color").value, byId("con-id").value].filter(Boolean).join(", ") || "____";
+  var dateVal = byId("con-date").value;
+  var dateStr = dateVal ? dateVal.split("-").reverse().join(".") : "«___» __________ 20___ г.";
+  var h = "<h3>ИНФОРМИРОВАННОЕ СОГЛАСИЕ НА ПРОВЕДЕНИЕ МАНИПУЛЯЦИЙ, СЕДАЦИИ / АНЕСТЕЗИИ И ОПЕРАТИВНОГО ВМЕШАТЕЛЬСТВА</h3>";
+  h += "<p>Я, <b>"+(byId("con-owner").value||"________")+"</b>"+(byId("con-doc").value? " ("+esc(byId("con-doc").value)+")":"")+
+       ", являясь владельцем (уполномоченным лицом) животного, даю согласие ветеринарной клинике и ветеринарному врачу на проведение следующих манипуляций в отношении животного.</p>";
+  h += "<p>"+petLine+".</p>";
+  if(list.length){ h += "<p><b>Согласуются:</b></p><ul>"+list.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ul>"; }
+  else { h += "<p><b>Согласуются:</b> ____________ (отметьте манипуляции в блоке выше).</p>"; }
+  h += "<p>Мне разъяснено и я понимаю, что: (1) цель и характер указанных процедур обсуждены с ветеринарным врачом; "+
+       "(2) любая седация, анестезия и любое вмешательство сопряжены с риском осложнений, включая, помимо прочего: аллергические реакции, "+
+       "нарушения ритма сердца, отёк лёгких, аспирацию, кровопотерю, инфицирование, расхождение швов, декомпенсацию хронических заболеваний, "+
+       "а в редких случаях — гибель животного; (3) при возникновении непосредственной угрозы жизни животного врач вправе действовать "+
+       "исходя из медицинских показаний без дополнительного согласования; (4) соблюдение назначений и рекомендаций обязательно; "+
+       "(5) прогноз зависит от индивидуальных особенностей пациента и может меняться по ходу лечения.</p>";
+  if(byId("con-anim").value.trim()) h += "<p><b>Дополнительно обсуждено:</b> "+esc(byId("con-anim").value)+"</p>";
+  h += "<p>Ориентировочная стоимость процедур мне озвучена "+(byId("con-pay").value?"("+esc(byId("con-pay").value)+")":"")+" и мне понятна. "+
+       "Отказ от предложенных процедур и его возможные последствия мне разъяснены.</p>";
+  h += "<p style='margin-top:18px'>Дата: <b>"+dateStr+"</b></p>"+
+       "<div class='sig'><div class='sigbox'><div class='sigline'></div><div class='sigcap'>подпись ветеринарного врача"+
+       (byId("con-owner").value?"":", ФИО: ________")+"</div></div>"+
+       "<div class='sigbox'><div class='sigline'></div><div class='sigcap'>подпись владельца"+
+       (byId("con-owner").value?": "+esc(byId("con-owner").value):", ФИО: ________")+"</div></div></div>";
+  byId("con-preview").innerHTML = h;
+}
+
+/* ---------- выписка: текст для мессенджера ---------- */
+function buildDisText(){
+  var L=[];
+  var d = byId("dis-date").value; if(d) d = d.split("-").reverse().join(".");
+  L.push("ПАМЯТКА ВЛАДЕЛЬЦУ");
+  if(byId("dis-clinic").value) L.push(byId("dis-clinic").value);
+  if(d) L.push("Дата: "+d);
+  var who = [byId("dis-pet").value, byId("dis-info").value].filter(Boolean).join(" — ");
+  if(who) L.push("Пациент: "+who);
+  if(byId("dis-done").value) L.push("\nЧТО БЫЛО СЕГОДНЯ:\n"+byId("dis-done").value);
+  var meds = $$("tbody tr", byId("tbl-dis-med")).map(function(tr){
+    return $$("input",tr).map(function(i){return i.value.trim();}).filter(Boolean).join(" — ");
+  }).filter(Boolean);
+  if(meds.length) L.push("\nЛЕКАРСТВА:\n"+meds.map(function(m,i){return (i+1)+") "+m;}).join("\n"));
+  if(byId("dis-watch").value) L.push("\nНАБЛЮДАТЬ ЗА:\n"+byId("dis-watch").value);
+  if(byId("dis-feed").value) L.push("\nКОРМЛЕНИЕ:\n"+byId("dis-feed").value);
+  if(byId("dis-rest").value) L.push("\nОГРАНИЧЕНИЯ:\n"+byId("dis-rest").value);
+  if(byId("dis-wound").value) L.push("\nШОВ / РАНА:\n"+byId("dis-wound").value);
+  var nxt = [byId("dis-next").value, byId("dis-nexttime").value].filter(Boolean).join(" ");
+  if(nxt) L.push("\nКОНТРОЛЬНЫЙ ПРИЁМ: "+nxt.split("-").reverse().join(" ").replace(" "," в "));
+  if(byId("dis-urgent").value) L.push("\nСРОЧНО К ВРАЧУ, ЕСЛИ:\n"+byId("dis-urgent").value);
+  if(byId("dis-clinic").value) L.push("\nКонтакты: "+byId("dis-clinic").value);
+  return L.join("\n");
+}
+function showCopyDialog(text){
+  var dlg = document.createElement("div");
+  dlg.style.cssText = "position:fixed;inset:0;background:rgba(10,30,25,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px";
+  var box = document.createElement("div");
+  box.style.cssText = "background:#fff;border-radius:12px;max-width:640px;width:100%;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.25)";
+  box.innerHTML = "<h3 style='margin:0 0 8px'>Текст для владельца</h3>"+
+    "<p style='margin:0 0 8px;font-size:13px;color:#63706b'>Выделите всё (Ctrl+A в поле) и скопируйте (Ctrl+C), либо нажмите кнопку:</p>"+
+    "<textarea style='width:100%;height:320px;font:13px/1.5 ui-monospace,monospace;border:1px solid #dbe3e0;border-radius:8px;padding:8px'></textarea>"+
+    "<div style='display:flex;gap:8px;margin-top:10px;justify-content:flex-end'>"+
+    "<button class='btn' data-x>Закрыть</button><button class='btn primary' data-c>Скопировать</button></div>";
+  dlg.appendChild(box);
+  document.body.appendChild(dlg);
+  var ta = $("textarea", box); ta.value = text; ta.focus(); ta.select();
+  $("[data-x]", box).onclick = function(){ document.body.removeChild(dlg); };
+  $("[data-c]", box).onclick = function(){
+    var done = function(){ $("[data-c]", box).textContent = "Скопировано ✓"; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, function(){ ta.select(); document.execCommand("copy"); done(); });
+    } else { ta.select(); try{ document.execCommand("copy"); }catch(e){} done(); }
+  };
+  dlg.addEventListener("click", function(e){ if(e.target===dlg) document.body.removeChild(dlg); });
+}
+byId("btn-copy-dis").addEventListener("click", function(){ showCopyDialog(buildDisText()); });
+
+/* ---------- экспорт / импорт ---------- */
+function download(name, text){
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], {type:"application/json"}));
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 400);
+}
+byId("btn-export").addEventListener("click", function(){
+  var all = {app:"VetTools", version:VERSION, exported:new Date().toISOString(), tabs:{}};
+  TAB_IDS.forEach(function(t){ all.tabs[t] = collectTab(byId("tab-"+t)); });
+  all.tabs.pro.customs = proCustoms;
+  var d = new Date(), stamp = d.getFullYear()+("0"+(d.getMonth()+1)).slice(-2)+("0"+d.getDate()).slice(-2)+"-"+("0"+d.getHours()).slice(-2)+("0"+d.getMinutes()).slice(-2);
+  download("vettools-backup-"+stamp+".json", JSON.stringify(all, null, 2));
+  markSaved();
+});
+byId("btn-import").addEventListener("click", function(){ byId("import-file").click(); });
+byId("import-file").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0];
+  if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    var ok = true, data = null;
+    try{ data = JSON.parse(r.result); }catch(err){ ok=false; }
+    if(ok && (!data || data.app!=="VetTools" || !data.tabs)){ ok=false; }
+    if(!ok){ alert("Это не похоже на резервную копию VetTools."); return; }
+    if(!confirm("Загрузить резервную копию и перезаписать текущие данные во всех разделах?")) return;
+    TAB_IDS.forEach(function(t){
+      if(data.tabs[t]) applyTab(byId("tab-"+t), data.tabs[t]);
+      saveTab(t, true);
+    });
+    if(Array.isArray(data.tabs.pro.customs)){ proCustoms = data.tabs.pro.customs; proWriteCustoms(); proRebuildPick(); }
+    $$("textarea").forEach(autosize);
+    recalcActive(); buildConsent();
+    markSaved();
+    alert("Резервная копия загружена.");
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+
+/* ---------- пересчёт активной вкладки ---------- */
+function recalcActive(){
+  if(activeTab==="cal"){ calc1(); calc2(); calc3(); calc4(); calc6(); }
+  if(activeTab==="dif"){ recalcDiff(); }
+  if(activeTab==="con"){ buildConsent(); }
+}
+["cal1-w","cal1-dose","cal1-conc","cal1-int","cal2-w","cal2-def","cal2-maint","cal2-drop","cal2-h",
+ "cal3-w","cal3-sp","cal3-f","cal3-kc","cal3-meals","cal4-w","cal4-sp","cal4-dose","cal6-w","cal6-bcs","cal6-sp"]
+.forEach(function(id){ byId(id).addEventListener("input", recalcActive); byId(id).addEventListener("change", recalcActive); });
+
+/* ================= инициализация ================= */
+window.addEventListener("beforeunload", function(){ try{ saveTab(activeTab, true); }catch(e){} });
+document.addEventListener("visibilitychange", function(){ if(document.hidden) saveTab(activeTab, true); });
+proReadCustoms();
+proRebuildPick();
+buildConverter();
+TAB_IDS.forEach(function(id){
+  var restored = restoreTab(id);
+  if(!restored) seedDefaults(id);
+});
+$$("textarea").forEach(autosize);
+buildConsent();
+recalcActive();
+(function(){
+  var last = null;
+  try{ last = localStorage.getItem(LS_PREFIX+"lasttab"); }catch(e){}
+  if(last && TAB_IDS.indexOf(last)>=0) activateTab(last);
+})();
+</script>
+</html>
