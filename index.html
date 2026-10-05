@@ -133,7 +133,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 <body>
 <header class="app">
   <div class="app-row">
-    <div class="logo">VetTools<span class="ver">v1.2</span></div>
+    <div class="logo">VetTools<span class="ver">v1.3</span></div>
     <div class="toolbar">
       <span class="savestate" id="savestate"></span>
       <button class="btn primary" onclick="window.print()">Печать</button>
@@ -151,6 +151,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
     <button data-tab="ane">Анест-лист</button>
     <button data-tab="pro">Протоколы</button>
     <button data-tab="nec">Некропсия</button>
+    <button data-tab="case">Случай: проверка</button>
     <button data-tab="cal">Калькуляторы</button>
     <button data-tab="dif">Анализы: было → стало</button>
   </nav>
@@ -525,7 +526,94 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   </div>
 </section>
 
-<!-- ============ 8. Калькуляторы ============ -->
+<!-- ============ 8. Клинический случай: проверка полноты ============ -->
+<section id="tab-case" class="tab">
+  <div class="card">
+    <h2>Клинический случай <span class="sub">— собери разбор, я проверю полноту и соберу черновик отчёта</span></h2>
+    <div class="grid">
+      <div class="f"><label for="case-id">№ случая</label><input type="text" id="case-id" placeholder="например, 2026-114"></div>
+      <div class="f"><label for="case-date">Дата обращения</label><input type="date" id="case-date"></div>
+      <div class="f"><label for="case-species">Вид</label>
+        <select id="case-species"><option value=""></option><option>собака</option><option>кошка</option><option>лошадь</option><option>КРС</option><option>МРС</option><option>свинья</option><option>грызун / хорёк</option><option>птица</option><option>экзот</option><option>другое</option></select></div>
+      <div class="f"><label for="case-breed">Порода</label><input type="text" id="case-breed"></div>
+      <div class="f"><label for="case-age">Возраст</label><input type="text" id="case-age" placeholder="7 лет / 8 мес"></div>
+      <div class="f"><label for="case-sex">Пол</label>
+        <select id="case-sex"><option value=""></option><option>самец</option><option>самец (кастрат)</option><option>самка</option><option>самка (стерилизованная)</option></select></div>
+      <div class="f"><label for="case-weight">Вес, кг</label><input type="number" id="case-weight" step="any" min="0"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label for="case-history">Анамнез / жалобы</label><textarea id="case-history" rows="5" placeholder="когда началось, чем лечили, условия содержания, вакцинации"></textarea></div>
+      <div class="f"><label for="case-exam">Данные осмотра</label><textarea id="case-exam" rows="5" placeholder="температура, ЧСС, ЧД, слизистые, пальпация, что нашёл"></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Диагностика</h2>
+    <div class="tbl-wrap">
+    <table class="grid-t" id="tbl-case-dx" data-table="case-dx">
+      <thead><tr>
+        <th style="min-width:130px">Исследование</th><th style="min-width:130px">Детали</th><th style="min-width:220px">Заключение / результат</th>
+        <th style="width:90px">Повторное</th><th class="no-print" style="width:34px"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-case-dx"><tr>
+      <td><input type="text" placeholder="УЗИ / биохимия / рентген..."></td><td><input type="text" placeholder="объём, где"></td><td><input type="text" placeholder="заключение, цифры"></td>
+      <td><select><option value=""></option><option>да</option></select></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <div class="toolbar-row no-print" style="margin-top:8px">
+      <button class="btn ghost sm" data-add="tbl-case-dx" type="button">+ строка</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label for="case-dx">Основной диагноз</label><textarea id="case-dx" rows="2"></textarea></div>
+      <div class="f"><label for="case-diff">Дифференциальные диагнозы</label><textarea id="case-diff" rows="2" placeholder="что ещё рассматривал и почему отверг"></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Лечение</h2>
+    <div class="tbl-wrap">
+    <table class="grid-t" id="tbl-case-rx" data-table="case-rx">
+      <thead><tr>
+        <th style="min-width:160px">Препарат</th><th style="min-width:180px">Доза, путь</th><th style="min-width:120px">Курс</th>
+        <th class="no-print" style="width:34px"></th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+    <template data-for="tbl-case-rx"><tr>
+      <td><input type="text"></td><td><input type="text" placeholder="2 мг/кг п/к"></td><td><input type="text" placeholder="5 дней"></td>
+      <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
+    </tr></template>
+    </div>
+    <div class="toolbar-row no-print" style="margin-top:8px">
+      <button class="btn ghost sm" data-add="tbl-case-rx" type="button">+ строка</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label for="case-control">Контроль / динамика</label><textarea id="case-control" rows="4" placeholder="что изменилось, повторные исследования, параметры в динамике"></textarea></div>
+      <div class="f"><label for="case-outcome">Исход</label>
+        <select id="case-outcome"><option value=""></option><option>выздоровление</option><option>улучшение</option><option>без динамики</option><option>ухудшение</option><option>эвтаназия</option><option>погиб</option><option>потерян из виду</option></select></div>
+      <div class="f" style="grid-column:1/-1"><label for="case-reco">Рекомендации / профилактика</label><textarea id="case-reco" rows="3"></textarea></div>
+    </div>
+  </div>
+  <div class="card no-print" id="case-check-panel">
+    <h2>Проверка полноты <span class="sub">— правила, не ИИ; обновляется на лету</span><span class="right" id="case-score" style="font-size:13px;color:var(--accent);font-weight:700;white-space:nowrap">—</span></h2>
+    <div id="case-bar" style="height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:6px 0 10px"><div id="case-bar-in" style="height:100%;width:0;background:var(--accent);transition:width .3s"></div></div>
+    <div id="case-checks" style="font-size:13px;line-height:1.7">Заполняй случай — проверки появятся здесь.</div>
+    <div class="toolbar-row" style="margin-top:10px">
+      <button class="btn primary sm" id="btn-case-copy" type="button">Черновик случая</button>
+      <button class="btn ghost sm" id="btn-case-check" type="button">Проверить сейчас</button>
+    </div>
+    <p class="hint">Черновик собирает всё в структурированный текст для отчёта/курсовой (копируется через окно). Проверки: критичные — без них случай неполный, жёлтые — стоит дописать, серые — советы.</p>
+  </div>
+</section>
+
+<!-- ============ 9. Калькуляторы ============ -->
 <section id="tab-cal" class="tab">
   <p class="hint" style="margin:0 0 12px">Расчёты справочные: результат всегда сверяйте с инструкцией к препарату и клинической ситуацией. Вес — в кг.</p>
   <div class="calc-grid">
@@ -654,18 +742,18 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </main>
 
 <footer class="app">
-  VetTools v1.2 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
+  VetTools v1.3 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
   расчёты справочные и не заменяют клинического суждения · часть экосистемы VetInSilico
 </footer>
 <script>
 "use strict";
 /* ================= VetTools v1.0 — ядро ================= */
-var VERSION = "1.2.0";
+var VERSION = "1.3.0";
 var LS_PREFIX = "vt:" + VERSION + ":";
 /* миграция: переносим данные предыдущей версии в текущее хранилище (новейший префикс, у которого есть ключи), чтобы ничего не потерять после обновления файла */
 try{
   if(!localStorage.getItem(LS_PREFIX+"seen")){
-    var oldPs = ["vt:1.1.0:", "vt:1.0.0:"];
+    var oldPs = ["vt:1.2.0:", "vt:1.1.0:", "vt:1.0.0:"];
     for(var op=0; op<oldPs.length; op++){
       var oldP = oldPs[op], ks = [];
       for(var i=0; i<localStorage.length; i++){
@@ -679,7 +767,7 @@ try{
     }
   }
 }catch(e){}
-var TAB_IDS = ["soap","dis","con","obs","ane","pro","nec","cal","dif"];
+var TAB_IDS = ["soap","dis","con","obs","ane","pro","nec","case","cal","dif"];
 var $ = function(s,r){ return (r||document).querySelector(s); };
 var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
 var byId = function(id){ return document.getElementById(id); };
@@ -695,6 +783,7 @@ function activateTab(id){
   $$("#tabs button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab===id); });
   TAB_IDS.forEach(function(t){ byId("tab-"+t).classList.toggle("active", t===id); });
   $$("textarea", byId("tab-"+id)).forEach(autosize);
+  recalcActive(); /* при входе во вкладку сразу показать актуальные расчёты/проверки */
   try{ localStorage.setItem(LS_PREFIX+"lasttab", id); }catch(e){}
 }
 $("#tabs").addEventListener("click", function(e){
@@ -829,6 +918,10 @@ function seedDefaults(id){
   if(id==="dis" && !$("tbody tr", byId("tbl-dis-med"))) addRows("tbl-dis-med", 4);
   if(id==="dif" && !$("tbody tr", byId("tbl-dif"))) addRows("tbl-dif", 6);
   if(id==="nec" && !$("tbody tr", byId("tbl-nec-find"))) addRows("tbl-nec-find", 4);
+  if(id==="case"){
+    if(!$("tbody tr", byId("tbl-case-dx"))) addRows("tbl-case-dx", 3);
+    if(!$("tbody tr", byId("tbl-case-rx"))) addRows("tbl-case-rx", 3);
+  }
 }
 function resetTabControls(id){
   var tab = byId("tab-"+id);
@@ -840,7 +933,7 @@ function resetTabControls(id){
 }
 function clearActiveTab(){
   var id = activeTab;
-  var names = {soap:"Приём (SOAP)",dis:"Выписка владельцу",con:"Согласие",obs:"Лист наблюдения",ane:"Анест-лист",pro:"Протоколы",nec:"Некропсия",cal:"Калькуляторы",dif:"Анализы"};
+  var names = {soap:"Приём (SOAP)",dis:"Выписка владельцу",con:"Согласие",obs:"Лист наблюдения",ane:"Анест-лист",pro:"Протоколы",nec:"Некропсия",case:"Случай",cal:"Калькуляторы",dif:"Анализы"};
   if(!confirm('Очистить раздел «'+names[id]+'»?\n\nДействие необратимо. Сначала можно сделать «Экспорт» — он сохранит резервную копию всех разделов.')) return;
   try{ localStorage.removeItem(LS_PREFIX+id); }catch(e){}
   resetTabControls(id);
@@ -1209,6 +1302,7 @@ function recalcActive(){
   if(activeTab==="cal"){ calc1(); calc2(); calc3(); calc4(); calc6(); }
   if(activeTab==="dif"){ recalcDiff(); }
   if(activeTab==="con"){ buildConsent(); }
+  if(activeTab==="case"){ runCaseCheck(); }
 }
 ["cal1-w","cal1-dose","cal1-conc","cal1-int","cal2-w","cal2-def","cal2-maint","cal2-drop","cal2-h",
  "cal3-w","cal3-sp","cal3-f","cal3-kc","cal3-meals","cal4-w","cal4-sp","cal4-dose","cal6-w","cal6-bcs","cal6-sp"]
@@ -1301,6 +1395,147 @@ function printHandover(){
   if(bg) bg.addEventListener("click",function(){ var n=genHandover(); flashHo("ho-gen", n?"собрано: "+n+" обход(а)":"таблица пуста — шапка и скелет"); });
   if(bc) bc.addEventListener("click",copyHandover);
   if(bp) bp.addEventListener("click",printHandover);
+})();
+
+/* ---------- клинический случай: проверка полноты (правила, не ИИ) ---------- */
+var CASE_MODS = [
+  {k:/узи|эхо|сонограф/i, n:"УЗИ"},
+  {k:/рентген|снимк|радиограф/i, n:"рентген"},
+  {k:/скт|компьют.*томограф|\bкт\b/i, n:"КТ"},
+  {k:/мрт|магнитн.*томограф/i, n:"МРТ"},
+  {k:/биохим|гематолог|гемограмм|общий анализ крови|оак|лейкограмм/i, n:"анализ крови"},
+  {k:/анализ мочи|уринал|осадок мочи/i, n:"анализ мочи"},
+  {k:/цитолог/i, n:"цитология"},
+  {k:/гистолог|биопс/i, n:"гистология/биопсия"},
+  {k:/посев|бакпосев|культур/i, n:"посев"},
+  {k:/фелв|fiv|влк|вирусный лейкоз|иммунодефицит кот/i, n:"FeLV/FIV"},
+  {k:/флотаци|копрограмм|кал на|паразитолог|копролог/i, n:"копрология"},
+  {k:/экг|электрокардио|холтер/i, n:"ЭКГ"}
+];
+function caseDxRows(){
+  return $$("#tbl-case-dx tbody tr").map(function(tr){
+    var c=$$("input,select",tr);
+    return c.length>=4 ? {n:c[0].value.trim(), d:c[1].value.trim(), r:c[2].value.trim(), rep:(c[3].value||"").trim()} : null;
+  }).filter(Boolean);
+}
+function caseRxRows(){
+  return $$("#tbl-case-rx tbody tr").map(function(tr){
+    var c=$$("input",tr);
+    return c.length>=3 ? {n:c[0].value.trim(), d:c[1].value.trim(), c:c[2].value.trim()} : null;
+  }).filter(function(r){ return r.n||r.d; });
+}
+function runCaseCheck(){
+  var g=function(id){ var el=byId(id); return el&&el.value ? el.value.trim() : ""; };
+  var items=[], core=0, passed=0;
+  var add=function(lv,m){ if(lv!=="info"){ core++; if(lv==="ok") passed++; } items.push({lv:lv,m:m}); };
+  /* сигнальные данные */
+  var miss=[];
+  if(!g("case-species")) miss.push("вид");
+  if(!g("case-age")) miss.push("возраст");
+  if(!g("case-sex")) miss.push("пол");
+  if(!g("case-weight")) miss.push("вес");
+  if(miss.length) add("warn","Сигнальные данные: не указан(ы) — "+miss.join(", "));
+  else add("ok","Сигнальные данные заполнены (вид, возраст, пол, вес)");
+  if(!g("case-date")) add("warn","Не указана дата обращения");
+  /* анамнез / осмотр */
+  if(!g("case-history")) add("crit","Анамнез / жалобы пусты — без них случай не читается");
+  else add("ok","Анамнез описан");
+  if(!g("case-exam")) add("crit","Данные осмотра пусты");
+  else add("ok","Осмотр описан");
+  /* диагностика */
+  var dxr=caseDxRows(), dxNamed=dxr.filter(function(r){ return r.n; });
+  if(!dxNamed.length) add("warn","Диагностика не описана — добавь хотя бы одно исследование со строкой заключения");
+  else add("ok","Диагностика: "+dxNamed.length+" исследован.");
+  dxNamed.forEach(function(r,i){
+    if(!r.r) add("warn","«"+r.n+"» (строка "+(i+1)+"): исследование названо, но заключения/результата нет — именно это теряют разборы");
+  });
+  /* упомянутые в тексте исследования без строки в диагностике */
+  var texts=(g("case-history")+" "+g("case-exam")+" "+g("case-control")).toLowerCase();
+  var dxNames=dxNamed.map(function(r){ return r.n.toLowerCase(); }).join(" ");
+  var mentioned=0;
+  CASE_MODS.forEach(function(m){
+    if(m.k.test(texts) && !m.k.test(dxNames)){
+      mentioned++;
+      if(mentioned<=3) add("warn","В тексте упоминается «"+m.n+"», а в таблице диагностики его строки нет — перенеси в таблицу с заключением, чтобы отчёт был структурирован");
+    }
+  });
+  if(mentioned>3) add("warn","…и ещё "+(mentioned-3)+" упомянутых исследований без строки в диагностике");
+  /* диагноз */
+  if(!g("case-dx")) add("crit","Основной диагноз не сформулирован");
+  else add("ok","Диагноз сформулирован");
+  if(!g("case-diff")) add("info","Дифференциальные диагнозы не указаны — для учебного/публикуемого случая их ждут первым вопросом");
+  /* лечение */
+  var rxr=caseRxRows();
+  if(!rxr.length && !g("case-control")) add("warn","Лечение не описано (ни строки препарата, ни динамики)");
+  else if(rxr.length) add("ok","Лечение: "+rxr.length+" назначен.");
+  rxr.forEach(function(r){
+    if(r.n && !r.d) add("warn","Препарат «"+r.n+"»: нет дозы/пути — в разборе без дозы назначение не считается");
+  });
+  /* контроль */
+  if(!g("case-control")) add("warn","Контроль / динамика пусты — чем случай закончился по дням, непонятно");
+  else add("ok","Динамика описана");
+  if(rxr.length && !dxr.some(function(r){ return r.rep==="да"; }) && !/повтор|контрольн|в динамике/i.test(g("case-control")))
+    add("info","Лечение есть, повторных исследований не видно — если проводились, впиши строкой с галкой «повторное»");
+  /* исход */
+  var oc=g("case-outcome");
+  if(!oc) add("crit","Исход не выбран — случай без исхода не случай");
+  else add("ok","Исход: "+oc);
+  if(/эвтаназия|погиб/.test(oc) && !/некропси|вскрыти|патанатом/i.test(texts))
+    add("info","Летальный исход: для разбора уместно описать некропсию (или явно указать, что не проводилась) — вкладка «Некропсия»");
+  /* рекомендации */
+  if(!g("case-reco")) add("info","Рекомендации/профилактика не описаны — необязательно, но в отчёте смотрят");
+  /* рендер */
+  var pct = core ? Math.round(100*passed/core) : 0;
+  var score=byId("case-score"), bar=byId("case-bar-in");
+  if(score) score.textContent = "готовность "+pct+"%";
+  if(bar){ bar.style.width=pct+"%"; bar.style.background = pct>=80 ? "var(--ok,#1a9a6c)" : (pct>=50 ? "var(--accent)" : "var(--danger,#c0554d)"); }
+  var box=byId("case-checks");
+  if(box){
+    var IC={ok:["var(--ok,#1a9a6c)","✓"],crit:["var(--danger,#c0554d)","✗"],warn:["#c07f2e","⚠"],info:["var(--muted,#6b7280)","i"]};
+    box.innerHTML = items.map(function(it){
+      var ic=IC[it.lv]||IC.info;
+      return '<div style="display:flex;gap:8px;align-items:baseline"><span style="color:'+ic[0]+';font-weight:700;flex:none;width:14px">'+ic[1]+'</span><span'+(it.lv==="info"?' style="color:var(--muted,#6b7280)"':'')+'>'+esc(it.m)+'</span></div>';
+    }).join("") || "Всё чисто.";
+  }
+}
+function buildCaseText(){
+  var g=function(id){ var el=byId(id); return el&&el.value ? el.value.trim() : ""; };
+  var L=[];
+  L.push("КЛИНИЧЕСКИЙ СЛУЧАЙ"+(g("case-id")?" №"+g("case-id"):""));
+  if(g("case-date")) L.push("Дата обращения: "+g("case-date").split("-").reverse().join("."));
+  var sig=[g("case-species"),g("case-breed"),g("case-age"),g("case-sex")].filter(Boolean).join(", ");
+  if(g("case-weight")) sig+=(sig?", ":"")+g("case-weight")+" кг";
+  L.push("Сигнальные данные: "+(sig||"—"));
+  L.push("");
+  L.push("АНАМНЕЗ / ЖАЛОБЫ: "+(g("case-history")||"—"));
+  L.push("ДАННЫЕ ОСМОТРА: "+(g("case-exam")||"—"));
+  L.push("");
+  var dxn=caseDxRows().filter(function(r){ return r.n; });
+  L.push("ДИАГНОСТИКА:"+(dxn.length?"":" не проводилась / не описана"));
+  dxn.forEach(function(r){ L.push("— "+r.n+(r.d?" ("+r.d+")":"")+": "+(r.r||"[заключение не описано]")+(r.rep==="да"?" · повторное":"")); });
+  L.push("");
+  L.push("ДИАГНОЗ: "+(g("case-dx")||"—"));
+  if(g("case-diff")) L.push("Дифференциальные диагнозы: "+g("case-diff"));
+  L.push("");
+  var rxn=caseRxRows().filter(function(r){ return r.n; });
+  L.push("ЛЕЧЕНИЕ:"+(rxn.length?"":" не описано"));
+  rxn.forEach(function(r){ L.push("— "+r.n+(r.d?" — "+r.d:"")+(r.c?", курс "+r.c:"")); });
+  L.push("");
+  L.push("КОНТРОЛЬ / ДИНАМИКА: "+(g("case-control")||"—"));
+  L.push("ИСХОД: "+(g("case-outcome")||"—"));
+  if(g("case-reco")) L.push("РЕКОМЕНДАЦИИ: "+g("case-reco"));
+  return L.join("\n");
+}
+(function(){
+  var tab=byId("tab-case");
+  if(tab){
+    var t=null;
+    var soon=function(){ clearTimeout(t); t=setTimeout(runCaseCheck,300); };
+    tab.addEventListener("input",soon);
+    tab.addEventListener("change",soon);
+    byId("btn-case-copy").addEventListener("click",function(){ showCopyDialog(buildCaseText()); });
+    byId("btn-case-check").addEventListener("click",runCaseCheck);
+  }
 })();
 
 /* ================= инициализация ================= */
