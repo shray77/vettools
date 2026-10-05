@@ -53,6 +53,7 @@ input[type=text],input[type=date],input[type=time],input[type=number],input[type
   width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;color:var(--ink);background:#fff;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,124,102,.12)}
 textarea{resize:vertical;min-height:64px;line-height:1.45;overflow:hidden}
+#ho-sheet{display:none}
 input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none}
 .chk{display:flex;align-items:center;gap:8px;font-size:14px;padding:3px 0}
 
@@ -123,6 +124,8 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   .grid-t input,.grid-t select{font-weight:400;border-bottom:none}
   .calc-grid{grid-template-columns:1fr 1fr;gap:10px}
   .calc .out{border:1px solid #999;background:#fff;border-style:solid}
+  body.print-ho .tab.active > *:not(#ho-sheet){display:none!important}
+  body.print-ho #ho-sheet{display:block!important;white-space:pre-wrap;line-height:1.55}
   .keep{page-break-inside:avoid}
 }
 </style>
@@ -130,7 +133,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 <body>
 <header class="app">
   <div class="app-row">
-    <div class="logo">VetTools<span class="ver">v1.1</span></div>
+    <div class="logo">VetTools<span class="ver">v1.2</span></div>
     <div class="toolbar">
       <span class="savestate" id="savestate"></span>
       <button class="btn primary" onclick="window.print()">Печать</button>
@@ -352,6 +355,17 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
     </div>
     <p class="hint">Каждая строка — один контрольный обход. Таблица умещается на A4 при печати.</p>
   </div>
+  <div class="card no-print" id="ho-card">
+    <h2>Передача смены <span class="sub">— автодрафт из листа наблюдения; перед передачей дежурному отредактируй вручную</span></h2>
+    <div class="toolbar-row" style="margin-top:6px">
+      <button class="btn ghost sm" id="ho-gen" type="button">Сформировать из таблицы</button>
+      <button class="btn ghost sm" id="ho-copy" type="button">Скопировать</button>
+      <button class="btn ghost sm" id="ho-print" type="button">Печать (только передача)</button>
+    </div>
+    <textarea id="ho-text" rows="12" style="width:100%;margin-top:8px" placeholder="Заполни лист наблюдения и нажми «Сформировать из таблицы» — подставлю шапку пациента, последний обход, «выполнено за сутки» и динамику T/ЧСС/ЧД. Блоки «что беспокоит» и «при ухудшении» — за врачом."></textarea>
+    <p class="hint">Автодрафт по структуре передачи: кто пациент → что сделали → что изменилось → что контролировать. Текст сохраняется в localStorage, печатается отдельно от таблицы.</p>
+  </div>
+  <div id="ho-sheet"></div>
 </section>
 
 <!-- ============ 5. Анест-лист ============ -->
@@ -640,21 +654,28 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </main>
 
 <footer class="app">
-  VetTools v1.1 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
+  VetTools v1.2 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
   расчёты справочные и не заменяют клинического суждения · часть экосистемы VetInSilico
 </footer>
 <script>
 "use strict";
 /* ================= VetTools v1.0 — ядро ================= */
-var VERSION = "1.1.0";
+var VERSION = "1.2.0";
 var LS_PREFIX = "vt:" + VERSION + ":";
-/* миграция: переносим данные версии 1.0.x в текущее хранилище, чтобы ничего не потерять после обновления файла */
+/* миграция: переносим данные предыдущей версии в текущее хранилище (новейший префикс, у которого есть ключи), чтобы ничего не потерять после обновления файла */
 try{
   if(!localStorage.getItem(LS_PREFIX+"seen")){
-    var oldP = "vt:1.0.0:";
-    for(var i=localStorage.length-1; i>=0; i--){
-      var k = localStorage.key(i);
-      if(k && k.indexOf(oldP)===0){ localStorage.setItem(LS_PREFIX+k.slice(oldP.length), localStorage.getItem(k)); }
+    var oldPs = ["vt:1.1.0:", "vt:1.0.0:"];
+    for(var op=0; op<oldPs.length; op++){
+      var oldP = oldPs[op], ks = [];
+      for(var i=0; i<localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(k && k.indexOf(oldP)===0) ks.push(k);
+      }
+      if(ks.length){
+        for(var j=0; j<ks.length; j++){ localStorage.setItem(LS_PREFIX+ks[j].slice(oldP.length), localStorage.getItem(ks[j])); }
+        break;
+      }
     }
   }
 }catch(e){}
@@ -1192,6 +1213,95 @@ function recalcActive(){
 ["cal1-w","cal1-dose","cal1-conc","cal1-int","cal2-w","cal2-def","cal2-maint","cal2-drop","cal2-h",
  "cal3-w","cal3-sp","cal3-f","cal3-kc","cal3-meals","cal4-w","cal4-sp","cal4-dose","cal6-w","cal6-bcs","cal6-sp"]
 .forEach(function(id){ byId(id).addEventListener("input", recalcActive); byId(id).addEventListener("change", recalcActive); });
+
+/* ---------- передача смены (лист наблюдения → автодрафт дежурному) ---------- */
+function genHandover(){
+  var g=function(id){ var el=byId(id); return el&&el.value ? el.value.trim() : ""; };
+  var lines=[];
+  var d=g("obs-date")||today();
+  lines.push("ПЕРЕДАЧА СМЕНЫ · "+d.split("-").reverse().join("."));
+  var who=g("obs-pet")||"—";
+  if(g("obs-owner")) who+=" · владелец: "+g("obs-owner");
+  lines.push("Пациент: "+who);
+  var extra=[];
+  if(g("obs-mode")) extra.push("режим: "+g("obs-mode"));
+  if(g("obs-diet")) extra.push("диета: "+g("obs-diet"));
+  lines.push("Диагноз: "+(g("obs-dx")||"—")+(extra.length?" · "+extra.join(" · "):""));
+  if(g("obs-date")){
+    try{
+      var d1=new Date(g("obs-date")+"T00:00:00"), d2=new Date(today()+"T00:00:00");
+      var dd=Math.round((d2-d1)/864e5);
+      if(isFinite(dd)&&dd>=0) lines.push("День госпитализации: "+(dd+1)+(dd===0?" (поступление сегодня)":""));
+    }catch(e){}
+  }
+  /* строки листа: [0]время [1]Т [2]ЧСС [3]ЧД [4]слизистые [5]еда/вода [6]моча/стул [7]состояние [8]ЛС [9]подпись */
+  var recs=$$("#tbl-obs tbody tr").map(function(tr){
+    var c=$$("input",tr);
+    return c.length>=10 ? {t:c[0].value.trim(),temp:c[1].value.trim(),hr:c[2].value.trim(),rr:c[3].value.trim(),muc:c[4].value.trim(),eat:c[5].value.trim(),uri:c[6].value.trim(),st:c[7].value.trim(),med:c[8].value.trim()} : null;
+  }).filter(function(r){ return r&&(r.t||r.temp||r.hr||r.rr||r.muc||r.eat||r.uri||r.st||r.med); });
+  if(recs.length){
+    var last=recs[recs.length-1];
+    if(recs.length>1){ var mx=recs.reduce(function(a,b){ return b.t>a.t?b:a; }); if(mx.t) last=mx; }
+    lines.push("");
+    lines.push("— Последний обход"+(last.t?" ("+last.t+")":"")+":");
+    var vit=[];
+    if(last.temp) vit.push("T "+last.temp+"°C");
+    if(last.hr) vit.push("ЧСС "+last.hr);
+    if(last.rr) vit.push("ЧД "+last.rr);
+    if(vit.length) lines.push(vit.join(" · "));
+    if(last.muc) lines.push("Слизистые/СПК: "+last.muc);
+    var ew=[];
+    if(last.eat) ew.push("еда/вода: "+last.eat);
+    if(last.uri) ew.push("моча/стул: "+last.uri);
+    if(ew.length) lines.push(ew.join(" · "));
+    if(last.st) lines.push("Состояние: "+last.st);
+    var seen={}, done=[];
+    recs.forEach(function(r){
+      if(!r.med) return;
+      r.med.split(/[;\n]+/).forEach(function(s){ s=s.trim(); if(!s) return; var k=s.toLowerCase(); if(!seen[k]){ seen[k]=1; done.push(s); } });
+    });
+    if(done.length){ lines.push(""); lines.push("— Выполнено за сутки ("+done.length+"): "+done.join("; ")); }
+    var first=recs[0];
+    var dyn=[], cmp=function(a,b){ var x=parseFloat(String(a).replace(",",".")), y=parseFloat(String(b).replace(",",".")); return (isFinite(x)&&isFinite(y))?(x<y?" ↑":(x>y?" ↓":" =")):""; };
+    if(first.temp&&last.temp) dyn.push("T "+first.temp+"→"+last.temp+"°C"+cmp(first.temp,last.temp));
+    if(first.hr&&last.hr) dyn.push("ЧСС "+first.hr+"→"+last.hr+cmp(first.hr,last.hr));
+    if(first.rr&&last.rr) dyn.push("ЧД "+first.rr+"→"+last.rr+cmp(first.rr,last.rr));
+    if(dyn.length){ lines.push(""); lines.push("— Динамика за сутки (первый → последний обход): "+dyn.join(" · ")); }
+  }
+  lines.push("");
+  lines.push("— Что беспокоит сейчас: …");
+  lines.push("— Контролировать: T, ЧСС, ЧД, слизистые/СПК, еда/вода, моча/стул (по листу наблюдения)");
+  lines.push("— При ухудшении: …");
+  var ta=byId("ho-text");
+  if(ta){ ta.value=lines.join("\n"); markDirtyTab(ta); saveSoon(); autosize(ta); }
+  return recs.length;
+}
+function flashHo(id,msg){ var b=byId(id); if(!b) return; var old=b.textContent; b.textContent=msg; setTimeout(function(){ b.textContent=old; },1800); }
+function copyHandover(){
+  var ta=byId("ho-text"); if(!ta) return;
+  var txt=ta.value;
+  if(!txt.trim()){ flashHo("ho-copy","сначала сформируй"); return; }
+  var ok=function(){ flashHo("ho-copy","скопировано ✓"); };
+  var fb=function(){ ta.focus(); ta.select(); try{ document.execCommand("copy"); ok(); }catch(e){ flashHo("ho-copy","выдели и Ctrl+C"); } };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok,fb); else fb();
+}
+function printHandover(){
+  var ta=byId("ho-text"), sh=byId("ho-sheet");
+  if(!ta||!sh) return;
+  if(!ta.value.trim()){ flashHo("ho-print","сначала сформируй"); return; }
+  sh.textContent=ta.value;
+  document.body.classList.add("print-ho");
+  setTimeout(function(){
+    window.print();
+    setTimeout(function(){ document.body.classList.remove("print-ho"); },400);
+  },60);
+}
+(function(){
+  var bg=byId("ho-gen"), bc=byId("ho-copy"), bp=byId("ho-print");
+  if(bg) bg.addEventListener("click",function(){ var n=genHandover(); flashHo("ho-gen", n?"собрано: "+n+" обход(а)":"таблица пуста — шапка и скелет"); });
+  if(bc) bc.addEventListener("click",copyHandover);
+  if(bp) bp.addEventListener("click",printHandover);
+})();
 
 /* ================= инициализация ================= */
 window.addEventListener("beforeunload", function(){ try{ saveTab(activeTab, true); }catch(e){} });
