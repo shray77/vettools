@@ -1,40 +1,47 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>VetTools — офлайн-инструменты ветврача</title>
+<link rel="stylesheet" href="./vet-ds.css">
 <style>
 :root{
-  --bg:#f2f5f4; --card:#fff; --ink:#182420; --muted:#63706b; --line:#dbe3e0;
-  --accent:#0e7c66; --accent-dark:#0b5d4e; --ok:#177a3d; --warn:#9a6b00; --bad:#b3261e;
-  --radius:12px;
-  --shadow:0 1px 2px rgba(20,40,35,.06), 0 4px 14px rgba(20,40,35,.05);
+  color-scheme: light;
+  /* Ядро — vet-ds (light-тема: data-theme="light" на <html>). Ниже — локальные алиасы. */
+  --bg: var(--ds-bg); --card: var(--ds-surface); --ink: var(--ds-text);
+  --muted: var(--ds-muted); --line: var(--ds-border);
+  --accent: var(--ds-accent); --accent-dark: var(--ds-accent-strong);
+  --ok: var(--ds-green); --warn: var(--ds-amber); --bad: var(--ds-red);
+  --danger: var(--ds-red);
+  --radius: var(--ds-radius);
+  --shadow: var(--ds-shadow);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body{margin:0;font:15px/1.5 var(--ds-font-sans);background:var(--bg);color:var(--ink)}
 
 /* ===== Header / nav / toolbar ===== */
-header.app{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 16px 12px}
+header.app{position:sticky;top:0;z-index:50;background:color-mix(in srgb, var(--card) 94%, transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:10px 16px 12px}
 .app-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;max-width:1200px;margin:0 auto}
 .logo{font-weight:800;font-size:21px;letter-spacing:-.3px;color:var(--accent-dark);user-select:none}
-.logo .ver{font-size:11px;font-weight:700;color:var(--muted);background:#eef3f1;border:1px solid var(--line);border-radius:99px;padding:1px 8px;vertical-align:3px;margin-left:6px}
+.logo .ver{font-size:11px;font-weight:700;color:var(--muted);background:var(--ds-surface2);border:1px solid var(--line);border-radius:99px;padding:1px 8px;vertical-align:3px;margin-left:6px}
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
 .savestate{font-size:12px;color:var(--muted);min-width:110px}
 nav#tabs{display:flex;gap:6px;flex-wrap:wrap;margin:9px auto 0;max-width:1200px}
 #tabs button{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
 #tabs button:hover{border-color:var(--accent);color:var(--accent)}
-#tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+#tabs button.active{background:var(--accent);border-color:var(--accent);color:var(--ds-accent-ink)}
 
 /* ===== Buttons ===== */
 .btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.primary:hover{background:var(--accent-dark);color:#fff}
-.btn.ghost{border-style:dashed;color:var(--accent);border-color:#bcd8d0}
-.btn.danger{color:var(--bad);border-color:#e6c5c2}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--ds-accent-ink)}
+.btn.primary:hover{background:var(--accent-dark);color:var(--ds-accent-ink)}
+.btn.ghost{border-style:dashed;color:var(--accent);border-color:color-mix(in srgb, var(--accent) 22%, transparent)}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb, var(--bad) 25%, transparent)}
 .btn.danger:hover{border-color:var(--bad);color:var(--bad)}
 .btn.sm{padding:4px 9px;font-size:12.5px}
 
@@ -51,7 +58,7 @@ main{max-width:1200px;margin:18px auto 40px;padding:0 16px}
 .f>label,.f>.lbl{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 input[type=text],input[type=date],input[type=time],input[type=number],input[type=tel],select,textarea{
   width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;color:var(--ink);background:#fff;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(14,124,102,.12)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)}
 textarea{resize:vertical;min-height:64px;line-height:1.45;overflow:hidden}
 #ho-sheet{display:none}
 input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);flex:none}
@@ -69,11 +76,11 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 .toolbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
 /* ===== Misc ===== */
-.badge{display:inline-block;border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700;white-space:nowrap}
-.badge.ok{background:#e6f4ea;color:var(--ok)}
-.badge.warn{background:#fbf3dd;color:var(--warn)}
-.badge.bad{background:#fdeceb;color:var(--bad)}
-.badge.dim{background:#eef1f0;color:var(--muted)}
+.badge{display:inline-block;border-radius:var(--ds-radius-s);padding:1px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.badge.ok{background:color-mix(in srgb, var(--ok) 13%, transparent);color:var(--ok)}
+.badge.warn{background:color-mix(in srgb, var(--warn) 12%, transparent);color:var(--warn)}
+.badge.bad{background:color-mix(in srgb, var(--bad) 12%, transparent);color:var(--bad)}
+.badge.dim{background:var(--ds-surface2);color:var(--muted)}
 .hint{font-size:12.5px;color:var(--muted);margin:4px 0 10px}
 .legal{font-size:13.5px;line-height:1.6;text-align:justify}
 .legal h3{text-align:center;font-size:15px;margin:6px 0 14px}
@@ -82,7 +89,7 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 .sig .sigbox{flex:1}
 .sig .sigline{border-bottom:1.5px solid #444;height:28px}
 .sig .sigcap{font-size:12px;color:var(--muted);margin-top:3px}
-.banner{background:#eef7f4;border:1px solid #cfe5df;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13.5px}
+.banner{background:color-mix(in srgb, var(--accent) 6%, var(--card));border:1px solid color-mix(in srgb, var(--accent) 20%, transparent);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13.5px}
 .banner b{color:var(--accent-dark)}
 .banner button{float:right;margin-left:12px}
 .doc-title{font-size:18px;font-weight:800;margin-bottom:10px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
@@ -92,7 +99,7 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 .calc-grid>.card{margin-bottom:0;min-width:0}
 .calc-grid,.grid,.sig{min-width:0}
 .tab{min-width:0}
-.calc .out{background:#f2f8f6;border:1px dashed #bcd8d0;border-radius:8px;padding:9px 11px;font-size:14px;margin-top:10px;line-height:1.65}
+.calc .out{background:color-mix(in srgb, var(--accent) 5%, var(--card));border:1px dashed color-mix(in srgb, var(--accent) 22%, transparent);border-radius:var(--ds-radius-s);padding:9px 11px;font-size:14px;margin-top:10px;line-height:1.65}
 .calc .out b{font-size:15.5px}
 .calc .out .dim{color:var(--muted);font-size:12.5px}
 .conv-tbl td{padding:5px 4px}
@@ -1488,10 +1495,10 @@ function runCaseCheck(){
   var pct = core ? Math.round(100*passed/core) : 0;
   var score=byId("case-score"), bar=byId("case-bar-in");
   if(score) score.textContent = "готовность "+pct+"%";
-  if(bar){ bar.style.width=pct+"%"; bar.style.background = pct>=80 ? "var(--ok,#1a9a6c)" : (pct>=50 ? "var(--accent)" : "var(--danger,#c0554d)"); }
+  if(bar){ bar.style.width=pct+"%"; bar.style.background = pct>=80 ? "var(--ok,#1a9a6c)" : (pct>=50 ? "var(--accent)" : "var(--bad,#c0554d)"); }
   var box=byId("case-checks");
   if(box){
-    var IC={ok:["var(--ok,#1a9a6c)","✓"],crit:["var(--danger,#c0554d)","✗"],warn:["#c07f2e","⚠"],info:["var(--muted,#6b7280)","i"]};
+    var IC={ok:["var(--ok,#1a9a6c)","✓"],crit:["var(--bad,#c0554d)","✗"],warn:["var(--warn,#c07f2e)","⚠"],info:["var(--muted,#6b7280)","i"]};
     box.innerHTML = items.map(function(it){
       var ic=IC[it.lv]||IC.info;
       return '<div style="display:flex;gap:8px;align-items:baseline"><span style="color:'+ic[0]+';font-weight:700;flex:none;width:14px">'+ic[1]+'</span><span'+(it.lv==="info"?' style="color:var(--muted,#6b7280)"':'')+'>'+esc(it.m)+'</span></div>';
