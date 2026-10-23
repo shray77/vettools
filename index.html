@@ -24,12 +24,12 @@ header.app{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);bac
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
 .savestate{font-size:12px;color:var(--muted);min-width:110px}
 nav#tabs{display:flex;gap:6px;flex-wrap:wrap;margin:9px auto 0;max-width:1200px}
-#tabs button{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:6px 13px;font:600 13.5px/1.2 inherit;cursor:pointer}
+#tabs button{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
 #tabs button:hover{border-color:var(--accent);color:var(--accent)}
 #tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
 /* ===== Buttons ===== */
-.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:7px 13px;font:600 13.5px/1.2 inherit;cursor:pointer}
+.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{background:var(--accent-dark);color:#fff}
@@ -1561,7 +1561,7 @@ recalcActive();
 <div style="max-width:1000px;margin:28px auto 40px;padding:0 16px;font:14px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
   <details style="border:1px solid #ddd;border-radius:10px;padding:12px 18px;background:#fffbe8;color:#444;">
     <summary style="cursor:pointer;font-weight:600;">Дисклеймер: информационный сервис, не ветеринарная консультация</summary>
-    <p style="margin:10px 0 6px;">VetTools предоставляется <b>«как есть»</b>, без гарантий полноты и точности. Справочники, калькуляторы и дозировки носят ознакомительный характер и не являются назначением: дозу, препарат и схему подтверждайте по актуальной инструкции производителя и с ветеринарным врачом — <b>даже если вы сами ветеринарный врач</b>. Результаты вычислений (дозы, инфузии, RER/MER, BSA) перепроверяйте вручную: ошибка возможна и в самом калькуляторе, без какого-либо ИИ. Файл работает локально, данные не покидают ваш браузер. Общие условия экосистемы VetInSilico: <a href="https://shray77.github.io/terms.html" style="color:#0b7">shray77.github.io/terms.html</a></p>
+    <p style="margin:10px 0 6px;">VetTools предоставляется <b>«как есть»</b>, без гарантий полноты и точности. Справочники, калькуляторы и дозировки носят ознакомительный характер и не являются назначением: дозу, препарат и схему подтверждайте по актуальной инструкции производителя и с ветеринарным врачом — <b>даже если вы сами ветеринарный врач</b>. Результаты вычислений (дозы, инфузии, RER/MER, BSA) перепроверяйте вручную: ошибка возможна и в самом калькуляторе, без какого-либо ИИ. Файл работает локально, данные не покидают ваш браузер. Общие условия экосистемы VetInSilico: <a href="https://shray77.github.io/terms.html" style="color:var(--accent-dark)">shray77.github.io/terms.html</a></p>
   </details>
 </div>
 </html>
