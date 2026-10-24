@@ -6,10 +6,15 @@
 <meta name="color-scheme" content="light">
 <title>VetTools — офлайн-инструменты ветврача</title>
 <link rel="stylesheet" href="./vet-ds.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>(function(){try{if(localStorage.getItem("vetds-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()</script>
 <style>
 :root{
   color-scheme: light;
   /* Ядро — vet-ds (light-тема: data-theme="light" на <html>). Ниже — локальные алиасы. */
+  --ds-accent: #0D745F; --ds-accent-strong: #0B5D4E; --ds-accent-ink: #F0FDF9;
   --bg: var(--ds-bg); --card: var(--ds-surface); --ink: var(--ds-text);
   --muted: var(--ds-muted); --line: var(--ds-border);
   --accent: var(--ds-accent); --accent-dark: var(--ds-accent-strong);
@@ -18,6 +23,7 @@
   --radius: var(--ds-radius);
   --shadow: var(--ds-shadow);
 }
+  [data-theme="dark"] { --ds-accent: #34D399; --ds-accent-strong: #6EE7B7; --ds-accent-ink: #06251B; }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -31,12 +37,12 @@ header.app{position:sticky;top:0;z-index:50;background:color-mix(in srgb, var(--
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto}
 .savestate{font-size:12px;color:var(--muted);min-width:110px}
 nav#tabs{display:flex;gap:6px;flex-wrap:wrap;margin:9px auto 0;max-width:1200px}
-#tabs button{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
+#tabs button{appearance:none;border:1px solid var(--line);background:var(--ds-surface);color:var(--ink);border-radius:99px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
 #tabs button:hover{border-color:var(--accent);color:var(--accent)}
 #tabs button.active{background:var(--accent);border-color:var(--accent);color:var(--ds-accent-ink)}
 
 /* ===== Buttons ===== */
-.btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
+.btn{appearance:none;border:1px solid var(--line);background:var(--ds-surface);color:var(--ink);border-radius:9px;padding:10px 14px;font:600 13.5px/1.2 inherit;cursor:pointer;min-height:38px}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--ds-accent-ink)}
 .btn.primary:hover{background:var(--accent-dark);color:var(--ds-accent-ink)}
@@ -57,7 +63,7 @@ main{max-width:1200px;margin:18px auto 40px;padding:0 16px}
 .f{display:flex;flex-direction:column;gap:3px;min-width:0}
 .f>label,.f>.lbl{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 input[type=text],input[type=date],input[type=time],input[type=number],input[type=tel],select,textarea{
-  width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;color:var(--ink);background:#fff;outline:none}
+  width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;color:var(--ink);background:var(--ds-surface);outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)}
 textarea{resize:vertical;min-height:64px;line-height:1.45;overflow:hidden}
 #ho-sheet{display:none}
@@ -71,7 +77,7 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 .grid-t td{padding:4px;border-bottom:1px solid var(--line);vertical-align:top}
 .grid-t input,.grid-t select{padding:5px 7px;font-size:13.5px}
 .grid-t .rowbtn{margin-top:2px}
-.rowbtn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:7px;width:26px;height:26px;font:700 14px/1 inherit;cursor:pointer;flex:none}
+.rowbtn{appearance:none;border:1px solid var(--line);background:var(--ds-surface);color:var(--muted);border-radius:7px;width:26px;height:26px;font:700 14px/1 inherit;cursor:pointer;flex:none}
 .rowbtn:hover{color:var(--bad);border-color:var(--bad)}
 .toolbar-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
@@ -147,6 +153,10 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <button class="btn" id="btn-export" title="Резервная копия всех разделов в JSON-файл">Экспорт</button>
       <button class="btn" id="btn-import" title="Загрузить резервную копию из JSON-файла">Импорт</button>
       <button class="btn danger" id="btn-clear" title="Очистить текущий раздел">Очистить раздел</button>
+      <button class="btn ds-theme-toggle" id="themeToggle" aria-label="Переключить тему" title="Переключить тему" style="padding:10px 12px">
+        <svg class="ds-theme-toggle__sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+        <svg class="ds-theme-toggle__moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
       <input type="file" id="import-file" accept=".json,application/json" hidden>
     </div>
   </div>
@@ -1239,7 +1249,7 @@ function showCopyDialog(text){
   var dlg = document.createElement("div");
   dlg.style.cssText = "position:fixed;inset:0;background:rgba(10,30,25,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px";
   var box = document.createElement("div");
-  box.style.cssText = "background:#fff;border-radius:12px;max-width:640px;width:100%;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.25)";
+  box.style.cssText = "background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:12px;max-width:640px;width:100%;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.25)";
   box.innerHTML = "<h3 style='margin:0 0 8px'>Текст для владельца</h3>"+
     "<p style='margin:0 0 8px;font-size:13px;color:#63706b'>Выделите всё (Ctrl+A в поле) и скопируйте (Ctrl+C), либо нажмите кнопку:</p>"+
     "<textarea style='width:100%;height:320px;font:13px/1.5 ui-monospace,monospace;border:1px solid #dbe3e0;border-radius:8px;padding:8px'></textarea>"+
@@ -1566,9 +1576,20 @@ recalcActive();
 </script>
 
 <div style="max-width:1000px;margin:28px auto 40px;padding:0 16px;font:14px/1.6 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
-  <details style="border:1px solid #ddd;border-radius:10px;padding:12px 18px;background:#fffbe8;color:#444;">
+  <details style="border:1px solid color-mix(in srgb, var(--warn) 35%, transparent);border-radius:var(--radius);padding:12px 18px;background:color-mix(in srgb, var(--warn) 8%, var(--ds-surface));color:var(--ink);">
     <summary style="cursor:pointer;font-weight:600;">Дисклеймер: информационный сервис, не ветеринарная консультация</summary>
     <p style="margin:10px 0 6px;">VetTools предоставляется <b>«как есть»</b>, без гарантий полноты и точности. Справочники, калькуляторы и дозировки носят ознакомительный характер и не являются назначением: дозу, препарат и схему подтверждайте по актуальной инструкции производителя и с ветеринарным врачом — <b>даже если вы сами ветеринарный врач</b>. Результаты вычислений (дозы, инфузии, RER/MER, BSA) перепроверяйте вручную: ошибка возможна и в самом калькуляторе, без какого-либо ИИ. Файл работает локально, данные не покидают ваш браузер. Общие условия экосистемы VetInSilico: <a href="https://shray77.github.io/terms.html" style="color:var(--accent-dark)">shray77.github.io/terms.html</a></p>
   </details>
 </div>
+<script>
+(function(){
+  var root = document.documentElement, key = "vetds-theme";
+  var btn = document.getElementById("themeToggle");
+  if (btn) btn.addEventListener("click", function(){
+    var dark = root.getAttribute("data-theme") === "dark";
+    if (dark) root.setAttribute("data-theme", "light"); else root.setAttribute("data-theme", "dark");
+    try { localStorage.setItem(key, dark ? "" : "dark"); } catch (e) {}
+  });
+})();
+</script>
 </html>
