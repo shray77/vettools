@@ -128,6 +128,34 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   nav#tabs::-webkit-scrollbar{display:none}
   #tabs button{flex:none;white-space:nowrap;padding:9px 12px;min-height:34px;font-size:12.5px}
   footer.app{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+  section[data-theme="form"]{padding:10px}
+}
+
+/* ===== Голос B «Формуляр» — таб-секции «действуешь» (HIG §11, Task 170) =====
+   Ядро v2.3.2 даёт секции беж #F5F3ED, радиус 6px, паддинг (§24) и самодостаточные
+   токены; локальный слой маппит свои примитивы (.f, input, .grid-t) на формулярный
+   вид. @media screen — чтобы не воевать с print-слоем ниже (у печати свои подчёркивания). */
+@media screen{
+  /* пин характера + РЕ-АНКОР локальных алиасов. ГРАБЛИ §24: алиасы объявлены
+     на :root — var() вычисляется на <html>, где --ds-surface/--ds-text ещё
+     значения ОБОЛОЧКИ. В тёмной: карточки темнели при чернильном тексте
+     (h2 1.14:1). Ре-декларация на секции заставляет var() резолвиться
+     формулярными токенами v2.3.2 (тот же класс бага, что zinc-коллизии
+     vet-insilico — там лечилось @theme inline, тут — ре-анкором). */
+  [data-theme="form"]{
+    --ds-accent:#0D745F; --ds-accent-strong:#0B5D4E; --ds-accent-ink:#F0FDF9;
+    --bg:var(--ds-bg); --card:var(--ds-surface); --ink:var(--ds-text);
+    --muted:var(--ds-muted); --line:var(--ds-border);
+    --accent:var(--ds-accent); --accent-dark:var(--ds-accent-strong);
+    --ok:var(--ds-green); --warn:var(--ds-amber); --bad:var(--ds-red);
+    --danger:var(--ds-red); --radius:var(--ds-radius); --shadow:var(--ds-shadow);
+  }
+  [data-theme="form"] .f>label,[data-theme="form"] .f>.lbl{font:500 10.5px/1.2 var(--ds-font-mono);text-transform:uppercase;letter-spacing:.12em;color:var(--ds-faint)}
+  [data-theme="form"] input[type=text],[data-theme="form"] input[type=date],[data-theme="form"] input[type=time],[data-theme="form"] input[type=number],[data-theme="form"] input[type=tel],[data-theme="form"] select,[data-theme="form"] textarea{border:none;border-bottom:1px solid var(--ds-border-strong);border-radius:0;background:transparent;padding:6px 2px;font-family:var(--ds-font-mono);font-size:13.5px}
+  [data-theme="form"] input:focus,[data-theme="form"] select:focus,[data-theme="form"] textarea:focus{border:none;border-bottom:2px solid var(--accent);margin-bottom:-1px;box-shadow:none}
+  [data-theme="form"] .doc-title{font-family:var(--ds-font-mono);font-size:15px;border:none;border-bottom:2px solid var(--ds-border-strong);border-radius:0;background:transparent;padding:6px 2px}
+  [data-theme="form"] .grid-t input,[data-theme="form"] .grid-t select,[data-theme="form"] .conv-tbl input{padding:4px 2px;font-size:12.5px}
+  [data-theme="form"] .hint{font-size:12px}
 }
 
 /* ===== Print ===== */
@@ -136,6 +164,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   body{background:#fff;font-size:12.5px}
   header.app,footer.app,nav#tabs,.toolbar,.no-print,textarea::-webkit-resizer{display:none!important}
   main{margin:0;padding:0;max-width:none}
+  section.tab[data-theme="form"]{padding:0;border-radius:0}
   .tab{display:none!important}
   .tab.active{display:block!important}
   .card{box-shadow:none;border:none;border-radius:0;padding:0 0 14px}
@@ -199,7 +228,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </div>
 
 <!-- ============ 1. SOAP ============ -->
-<section id="tab-soap" class="tab active">
+<section id="tab-soap" class="tab active" data-theme="form">
   <div class="card">
     <h2>Приём — шапка</h2>
     <div class="grid">
@@ -250,7 +279,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </section>
 
 <!-- ============ 2. Выписка владельцу ============ -->
-<section id="tab-dis" class="tab">
+<section id="tab-dis" class="tab" data-theme="form">
   <div class="card">
     <h2>Памятка владельцу <span class="sub">— заполнить, затем распечатать или скопировать текстом в мессенджер</span></h2>
     <div class="grid">
@@ -307,7 +336,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   </div>
 </section>
 <!-- ============ 3. Согласие ============ -->
-<section id="tab-con" class="tab">
+<section id="tab-con" class="tab" data-theme="form">
   <div class="card no-print">
     <h2>Данные для информированного согласия</h2>
     <p class="hint">Заполните поля и отметьте манипуляции — текст документа ниже соберётся автоматически. Печать выводит только документ.</p>
@@ -352,7 +381,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </section>
 
 <!-- ============ 4. Лист наблюдения ============ -->
-<section id="tab-obs" class="tab">
+<section id="tab-obs" class="tab" data-theme="form">
   <div class="card">
     <h2>Лист наблюдения <span class="sub">— стационар / послеоперационное содержание</span></h2>
     <div class="grid">
@@ -403,7 +432,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </section>
 
 <!-- ============ 5. Анест-лист ============ -->
-<section id="tab-ane" class="tab">
+<section id="tab-ane" class="tab" data-theme="form">
   <div class="card">
     <h2>Анестезиологический лист — шапка</h2>
     <div class="grid">
@@ -479,7 +508,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   </div>
 </section>
 <!-- ============ 6. Протоколы ============ -->
-<section id="tab-pro" class="tab">
+<section id="tab-pro" class="tab" data-theme="form">
   <div class="card no-print">
     <h2>Библиотека протоколов</h2>
     <div class="toolbar-row">
@@ -497,7 +526,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </section>
 
 <!-- ============ 7. Некропсия ============ -->
-<section id="tab-nec" class="tab">
+<section id="tab-nec" class="tab" data-theme="form">
   <div class="card">
     <h2>Протокол патологоанатомического вскрытия — шапка</h2>
     <div class="grid">
@@ -560,7 +589,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </section>
 
 <!-- ============ 8. Клинический случай: проверка полноты ============ -->
-<section id="tab-case" class="tab">
+<section id="tab-case" class="tab" data-theme="form">
   <div class="card">
     <h2>Клинический случай <span class="sub">— собери разбор, я проверю полноту и соберу черновик отчёта</span></h2>
     <div class="grid">
@@ -647,7 +676,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </section>
 
 <!-- ============ 9. Калькуляторы ============ -->
-<section id="tab-cal" class="tab">
+<section id="tab-cal" class="tab" data-theme="form">
   <p class="hint" style="margin:0 0 12px">Расчёты справочные: результат всегда сверяйте с инструкцией к препарату и клинической ситуацией. Вес — в кг.</p>
   <div class="calc-grid">
     <div class="card calc">
@@ -734,7 +763,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   </div>
 </section>
 <!-- ============ 9. Анализы: было → стало ============ -->
-<section id="tab-dif" class="tab">
+<section id="tab-dif" class="tab" data-theme="form">
   <div class="card">
     <h2>Анализы: было → стало <span class="sub">— сравнение двух исследований</span></h2>
     <div class="grid">
