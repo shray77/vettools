@@ -118,6 +118,16 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
   .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .calc-grid{grid-template-columns:1fr}
   .sig{gap:20px}
+  /* мобильная компакция хедера (Task 165): было 330px sticky на 844px = 39% экрана */
+  header.app{padding:8px 12px 9px}
+  .logo{font-size:17px}
+  .app-row{gap:8px}
+  .toolbar{margin-left:0;width:100%;gap:6px}
+  .toolbar .btn{padding:8px 10px;min-height:34px;font-size:12.5px}
+  nav#tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;margin:8px auto 0}
+  nav#tabs::-webkit-scrollbar{display:none}
+  #tabs button{flex:none;white-space:nowrap;padding:9px 12px;min-height:34px;font-size:12.5px}
+  footer.app{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 }
 
 /* ===== Print ===== */
@@ -765,8 +775,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </main>
 
 <footer class="app">
-  VetTools v1.3 · один офлайн-файл, работает с диска без интернета и без ИИ · данные хранятся только в этом браузере (localStorage), резервная копия — кнопка «Экспорт» ·
-  расчёты справочные и не заменяют клинического суждения · часть экосистемы VetInSilico
+  VetTools v1.3 · один офлайн-файл — работает с диска без интернета и без ИИ · данные хранятся только в этом браузере · расчёты справочные и не заменяют клинического суждения
 </footer>
 <script>
 "use strict";
