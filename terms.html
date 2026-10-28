@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Условия использования и дисклеймер — VetTools</title>
+<meta name="description" content="VetTools — офлайн-инструменты ветврача: как есть, не ветеринарная консультация, калькуляторы и дозировки ознакомительные, данные не покидают браузер.">
+<meta property="og:title" content="Условия использования и дисклеймер — VetTools">
+<meta property="og:description" content="Инструмент «как есть», не ветеринарный совет; результаты вычислений перепроверяйте вручную.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shray77.github.io/vettools/terms.html">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://shray77.github.io/vettools/terms.html">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+<link rel="stylesheet" href="./vet-ds.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>(function(){try{if(localStorage.getItem("vetds-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()</script>
+<style>
+    /* Ядро — vet-ds (./vet-ds.css). Ниже — локальные алиасы и характер витрины
+       (акцент vettools), значения токенов не дублируются. */
+  :root {
+    --ds-accent: #0D745F; --ds-accent-strong: #0B5D4E; --ds-accent-ink: #F0FDF9;
+    --bg: var(--ds-bg);
+    --surface: var(--ds-surface);
+    --surface2: var(--ds-surface2);
+    --border: var(--ds-border);
+    --text: var(--ds-text);
+    --muted: var(--ds-muted);
+    --faint: var(--ds-faint);
+    --accent: var(--ds-accent);
+    --blue: var(--ds-blue);
+    --warn: var(--ds-amber);
+    --err: var(--ds-red);
+    --mono: var(--ds-font-mono);
+    --accent-dim: color-mix(in srgb, var(--accent) 12%, transparent);
+  }
+  [data-theme="dark"] {
+    --ds-accent: #34D399; --ds-accent-strong: #6EE7B7; --ds-accent-ink: #06251B;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  body { background: var(--bg); color: var(--text); font: 16px/1.65 var(--ds-font-sans); margin: 0; }
+  .hub { display: flex; gap: 6px; flex-wrap: wrap; font: 12.5px var(--mono); max-width: 860px; margin: 0 auto; padding: 12px 20px 0; }
+  .hub a { color: var(--muted); text-decoration: none; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 5px 12px; }
+  .hub a:hover { color: var(--text); border-color: var(--ds-border-strong); }
+  .hub a.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); background: var(--accent-dim); }
+  header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  header.top { border-bottom: 1px solid var(--border); padding: 26px 0 22px; }
+  .theme-pill { min-height: 34px; padding: 0 13px; font: 500 12px var(--ds-font-mono, var(--mono, monospace)); }
+  .theme-pill svg { color: var(--accent); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .logo { width: 52px; height: 52px; border-radius: var(--ds-radius); background: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); display: grid; place-items: center; font-size: 24px; flex: none; color: var(--accent); font-family: var(--mono); font-weight: 700; }
+  h1 { font-size: 23px; margin: 0; letter-spacing: -.02em; }
+  .brand p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+  .tldr { background: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: var(--ds-radius); padding: 16px 20px; margin: 26px 0 8px; }
+  .tldr h2 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); }
+  .tldr ul { margin: 0; padding-left: 20px; }
+  .tldr li { margin: 6px 0; font-size: 15px; }
+  article section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--ds-radius); padding: 18px 22px; margin: 14px 0; }
+  article h2 { font-size: 17px; margin: 0 0 10px; letter-spacing: -.01em; }
+  article p { margin: 8px 0; color: var(--muted); }
+  article p b, article li b { color: var(--text); }
+  article ul { margin: 8px 0; padding-left: 20px; color: var(--muted); }
+  article li { margin: 5px 0; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .upd { color: var(--faint); font: 12.5px var(--mono); margin-top: 18px; }
+  footer { border-top: 1px solid var(--border); margin-top: 36px; padding: 18px 0 30px; }
+  .foot { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--faint); }
+  .foot a { color: var(--muted); text-decoration: none; }
+  .foot a:hover { color: var(--accent); }
+  .foot .legal { color: var(--warn); }
+</style>
+</head>
+<body>
+<nav class="hub" aria-label="Экосистема">
+  <a href="./index.html" class="on">VetTools</a>
+  <a href="https://shray77.github.io/">Визитка</a>
+  <a href="https://shray77.github.io/vetdigest-site/">Дайджест науки</a>
+  <a href="https://shray77.github.io/vetrecall-site/">Отзывы и вспышки РФ</a>
+  <a href="https://shray77.github.io/biothreat-site/">Биоугрозы мира</a>
+  <a href="https://shray77.github.io/vet-heatmap/">ВетКарта</a>
+  <a href="https://shray77.github.io/vetflu-site/">Окна риска ВПГП</a>
+  <a href="https://shray77.github.io/rss-core-site/">Статус ядра</a>
+  <a href="https://shray77.github.io/vetfecrt-site/">ФЭКРТ</a>
+</nav>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div class="logo">Vt</div>
+      <div>
+        <h1>Условия использования и дисклеймер</h1>
+        <p>VetTools — офлайн-инструменты ветврача: один файл, без ИИ и без сервера</p>
+      </div>
+    </div>
+    <button class="ds-btn ds-btn--sm ds-theme-toggle ds-theme-toggle--labeled theme-pill" id="themeToggle" aria-label="Переключить тему" title="Переключить тему">
+        <svg class="ds-theme-toggle__sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>
+        <svg class="ds-theme-toggle__moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span class="ds-theme-toggle__label" aria-hidden="true"></span>
+      </button>
+  </div>
+</header>
+
+<main class="wrap">
+<article>
+  <div class="tldr">
+    <h2>Коротко</h2>
+    <ul>
+      <li>Инструмент предоставляется <b>«как есть»</b>, без гарантий полноты, точности и доступности.</li>
+      <li>Это <b>не ветеринарная консультация и не назначение</b>: дозу, препарат и схему подтверждайте по инструкции и с ветеринарным врачом — даже если вы сами ветеринарный врач.</li>
+      <li>Калькуляторы и справочники — <b>ознакомительные</b>: ошибка возможна и в самом калькуляторе, без какого-либо ИИ; результаты перепроверяйте вручную.</li>
+      <li><b>Данные не покидают ваш браузер</b>: автосохранение в localStorage, перенос — файлом экспорта/импорта JSON.</li>
+    </ul>
+  </div>
+
+  <section id="about">
+    <h2>Об инструменте</h2>
+    <p>VetTools — набор офлайн-инструментов ветеринарного врача в одном самодостаточном HTML-файле: документные бланки (приём, согласие, наблюдение, анестезия, некропсия), калькуляторы (дозировки, инфузии, энергия RER/MER, BSA, конвертер единиц, кондиция) и справочные заготовки протоколов. Файл работает локально в браузере, без сервера и без интернета.</p>
+    <p>Инструмент разработан и поддерживается автором экосистемы VetInSilico самостоятельно, предоставляется бесплатно, носит информационный характер и не является ветеринарной организацией, учебным ресурсом или программным продуктом, сертифицированным для медицинских решений.</p>
+  </section>
+
+  <section id="advice">
+    <h2>Не ветеринарная консультация</h2>
+    <p>Бланки, справочники, протоколы и расчёты <b>не являются</b> ветеринарной консультацией, диагнозом, назначением, схемой лечения или руководством к действию. Решения о здоровье, лечении и содержании животных принимает только ветеринарный врач, осмотревший животное, либо уполномоченный специалист уполномоченного учреждения.</p>
+    <p><b>Консультируйтесь с ветеринарным врачом, даже если вы сами ветеринарный врач.</b> Справочные дозы в заготовках протоколов — ориентиры из настольных источников: они не учитывают конкретного пациента, препарат конкретного производителя, противопоказания и взаимодействие лекарств.</p>
+  </section>
+
+  <section id="calc">
+    <h2>Калькуляторы и вычисления</h2>
+    <p><b>Любые расчёты</b> — дозы (мг/кг → мл), инфузии и дефицит жидкости, энергия RER/MER, площадь поверхности тела (BSA), конвертер единиц — выполняются формулами в самом файле и предоставляются исключительно для ориентировки и перепроверки. <b>Ошибка возможна и без ИИ</b> — из-за опечатки в формуле, округления или неверного ввода.</p>
+    <p>Отдельно о расчёте энергии: RER считается гибридной формулой — в диапазоне 2–45 кг линейной (30·вес + 70), вне диапазона — степенной (70·вес^0,75); смена формулы на границах задокументирована в интерфейсе калькулятора. Если результат расходится с вашим справочником — сверьте формулу и пересчитайте вручную.</p>
+    <p>Ввод чисел — с запятой в качестве десятичного разделителя (например, 10,5). Перед клиническим применением любой результат перепроверяйте вручную по действующей инструкции к препарату.</p>
+  </section>
+
+  <section id="privacy">
+    <h2>Приватность и данные</h2>
+    <p>Файл работает локально: введённые данные автосохраняются в localStorage вашего браузера и <b>не покидают устройство</b> — никуда не отправляются, серверной части не существует. Перенос данных между компьютерами выполняется вами вручную файлом экспорта/импорта (JSON). При открытии веб-версии хостинг-провайдер (GitHub Pages) может вести стандартные технические журналы; его политика применяется отдельно.</p>
+  </section>
+
+  <section id="third">
+    <h2>Ссылки на третьи стороны</h2>
+    <p>Страница содержит ссылки на родственные витрины экосистемы и внешние ресурсы, за содержание которых автор ответственности не несёт. Все упомянутые товарные знаки, названия организаций и препаратов принадлежат их правообладателям; упоминания носят исключительно информационный характер и не означают связи, одобрения или партнёрства.</p>
+  </section>
+
+  <section id="changes">
+    <h2>Изменение условий</h2>
+    <p>Настоящие условия могут быть изменены в любой момент без предварительного уведомления; актуальная версия всегда доступна на этой странице. Продолжение использования инструмента после обновления означает согласие с новыми условиями.</p>
+  </section>
+
+  <section id="contact">
+    <h2>Связь</h2>
+    <p>Замечания об ошибках в формулах, расчётах и текстах — через GitHub Issues: <a href="https://github.com/shray77/vettools/issues">github.com/shray77/vettools</a>.</p>
+  </section>
+</article>
+<p class="upd">Версия от 27.10.2026 · VetInSilico</p>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="legal">информационный сервис · не ветеринарный совет · <a href="./terms.html">условия и дисклеймер</a></span>
+    <a href="./index.html">VetTools — к инструменту</a>
+    <a href="https://shray77.github.io/">визитка экосистемы</a>
+  </div>
+</footer>
+<script>
+(function(){
+  var root = document.documentElement, key = "vetds-theme";
+  var btn = document.getElementById("themeToggle");
+  if (btn) btn.addEventListener("click", function(){
+    var dark = root.getAttribute("data-theme") === "dark";
+    if (dark) root.setAttribute("data-theme", "light"); else root.setAttribute("data-theme", "dark");
+    try { localStorage.setItem(key, dark ? "" : "dark"); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
