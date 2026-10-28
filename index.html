@@ -99,6 +99,11 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 .banner b{color:var(--accent-dark)}
 .banner button{float:right;margin-left:12px}
 .doc-title{font-size:18px;font-weight:800;margin-bottom:10px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%}
+/* Task 184: «готовность N%» в заголовке «Проверка полноты» прижата вправо — у .right
+   не было ни одного правила (аудит 183, мелочь): спан стоял в потоке строки заголовка.
+   Flex — только у этого h2 (не все .card h2: у них .sub-подписи должны переноситься). */
+#case-check-panel h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+#case-check-panel h2 .right{margin-left:auto}
 
 /* ===== Calculators ===== */
 .calc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
@@ -502,7 +507,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <div class="f"><label for="ane-maint">Поддержание (агент, об.%)</label><textarea id="ane-maint" rows="2"></textarea></div>
       <div class="f"><label for="ane-fluids">Инфузия (препарат, объём, скорость)</label><textarea id="ane-fluids" rows="2"></textarea></div>
       <div class="f"><label for="ane-local">Регионарная / местная анальгезия</label><textarea id="ane-local" rows="2"></textarea></div>
-      <div class="f"><label for="ane-monitor">Мониторинг (апаратура)</label><textarea id="ane-monitor" rows="2" placeholder="пульсоксиметр, АД, капнограф..."></textarea></div>
+      <div class="f"><label for="ane-monitor">Мониторинг (апаратура)</label><textarea id="ane-monitor" rows="2" placeholder="пульсоксиметр, АД, капнограф…"></textarea></div>
     </div>
   </div>
   <div class="card">
@@ -652,7 +657,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <tbody></tbody>
     </table>
     <template data-for="tbl-case-dx"><tr>
-      <td><input type="text" placeholder="УЗИ / биохимия / рентген..."></td><td><input type="text" placeholder="объём, где"></td><td><input type="text" placeholder="заключение, цифры"></td>
+      <td><input type="text" placeholder="УЗИ / биохимия / рентген…"></td><td><input type="text" placeholder="объём, где"></td><td><input type="text" placeholder="заключение, цифры"></td>
       <td><select><option value=""></option><option>да</option></select></td>
       <td class="no-print"><button class="rowbtn" type="button" title="Удалить строку">×</button></td>
     </tr></template>
@@ -843,7 +848,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 /* ================= VetTools v1.3 — ядро ================= */
 var VERSION = "1.3.0";
 var LS_PREFIX = "vt:" + VERSION + ":";
-/* миграция: переносим данные предыдущей версии в текущее хранилище (новейший префикс, у которого есть ключи), чтобы ничего не потерять после обновления файла */
+/* миграция: переносим данные предыдущей версии в текущее хранилище (новейший префикс, у которого есть ключи), чтобы ничего не потерять после обновления файла; перенесённые старые ключи удаляем — по ~10 ключей на версию не копим мусор в хранилище (Task 184) */
 try{
   if(!localStorage.getItem(LS_PREFIX+"seen")){
     var oldPs = ["vt:1.2.0:", "vt:1.1.0:", "vt:1.0.0:"];
@@ -854,7 +859,10 @@ try{
         if(k && k.indexOf(oldP)===0) ks.push(k);
       }
       if(ks.length){
-        for(var j=0; j<ks.length; j++){ localStorage.setItem(LS_PREFIX+ks[j].slice(oldP.length), localStorage.getItem(ks[j])); }
+        for(var j=0; j<ks.length; j++){
+          localStorage.setItem(LS_PREFIX+ks[j].slice(oldP.length), localStorage.getItem(ks[j]));
+          localStorage.removeItem(ks[j]); /* Task 184: удаляем только после успешного переноса; упал setItem — ключ останется и миграция повторится */
+        }
         break;
       }
     }
@@ -1028,7 +1036,6 @@ document.addEventListener("change", function(e){
 var DATE_IDS = ["soap-date","dis-date","con-date","obs-date","ane-date"];
 var DIS_URGENT_DEFAULT = "вялость более 12–24 часов; отказ от еды или воды; многократная рвота или диарея; кровотечение; выделения, отёк, покраснение в области шва; расхождение швов; владелец не может предотвратить вылизывание шва; бледные или синюшные слизистые; тяжёлое или частое дыхание; судороги, потеря сознания; выраженная боль (скулит, не даёт трогать).";
 function seedDefaults(id){
-  var tab = byId("tab-"+id);
   DATE_IDS.forEach(function(did){ var el = byId(did); if(el && !el.value) el.value = today(); });
   if(id==="dis" && !byId("dis-urgent").value) byId("dis-urgent").value = DIS_URGENT_DEFAULT;
   if(id==="obs" && !$("tbody tr", byId("tbl-obs"))) addRows("tbl-obs", 6);
@@ -1099,10 +1106,18 @@ function calc2(){
       f=num(byId("cal2-drop").value), h=num(byId("cal2-h").value);
   var out = byId("cal2-out");
   if(!(w>0)){ out.innerHTML=numHint(byId("cal2-w"),"вес"); return; }
+  /* Task 184: «Дегидратация, %» — гвард-клэмп в JS (HTML-атрибут max=15 исчез при
+     переходе на type=text в 183-й волне): выше 15% — вне шкалы оценки, молчаливый
+     «дефицит 200 мл/кг» недопустим; считаем по 15% и честно помечаем это в выводе. */
+  var dhClamp = "";
+  if(p!=null && p>15){
+    dhClamp = "<br><span class='dim'>⚠ Введено "+fmt(p,1)+"% — выше шкалы оценки: расчёт по 15%. Пересмотрите оценку дегидратации и состояние пациента.</span>";
+    p = 15;
+  }
   var def = (p>0? p*w*10 : 0);           // мл: % × кг × 10
   var maint = (m>0? m*w : 40*w);          // мл/сут
   var total = def + maint;
-  var s = "Дефицит ("+fmt(p||0,1)+"%): <b>"+fmt(def,0)+" мл</b> · поддержание: <b>"+fmt(maint,0)+" мл/сут</b><br>";
+  var s = "Дефицит ("+fmt(p||0,1)+"%): <b>"+fmt(def,0)+" мл</b> · поддержание: <b>"+fmt(maint,0)+" мл/сут</b>"+dhClamp+"<br>";
   if(def>0 && h>0){
     var sp = (def + maint*h/24)/h;
     s += "Первые "+fmt(h,0)+" ч: <b>"+fmt(sp,0)+" мл/ч</b> ≈ <b>"+fmt(sp*f/60,1)+" гтт/мин</b> ("+fmt(f,0)+" гтт/мл)<br>";
@@ -1116,7 +1131,17 @@ function calc2(){
 function calc3(){
   /* cal3-f — select с внутренними значениями «1.6» и т.п.: это не поле ввода,
      парсим напрямую parseFloat (строгий num() с запятой для него не нужен). */
-  var w=num(byId("cal3-w").value), f=parseFloat(byId("cal3-f").value), kc=num(byId("cal3-kc").value), meals=num(byId("cal3-meals").value)||2;
+  var w=num(byId("cal3-w").value), f=parseFloat(byId("cal3-f").value), kc=num(byId("cal3-kc").value);
+  /* Task 184: «Кормлений в сутки» — явный гвард вместо молчаливого num()||2
+     (мусор/0 тихо превращались в «2 кормления»): пусто — осознанный дефолт 2,
+     мусор или ≤0 — честное предупреждение, порции не считаем. */
+  var mealsEl = byId("cal3-meals"), meals = num(mealsEl.value), mealsMsg = "";
+  if(meals==null){
+    if(String(mealsEl.value).trim()!=="") mealsMsg = "⚠ «Кормлений в сутки»: не понимаю «"+esc(String(mealsEl.value).trim())+"» как число — напр., 3. Порции не считаю.";
+    else meals = 2;
+  } else if(!(meals>0)){
+    mealsMsg = "⚠ «Кормлений в сутки» — должно быть не меньше 1. Порции не считаю.";
+  }
   var out = byId("cal3-out");
   var r = rer(w);
   if(!r){ out.innerHTML=numHint(byId("cal3-w"),"вес"); return; }
@@ -1131,6 +1156,7 @@ function calc3(){
   } else {
     s += "<br><span class='dim'>Укажите калорийность корма (ккал/100 г) — переведу в граммы.</span>";
   }
+  if(mealsMsg) s += "<br><span class='dim'>"+mealsMsg+"</span>";
   out.innerHTML = s;
 }
 function calc4(){
@@ -1208,15 +1234,17 @@ function recalcDiffRow(tr){
   var lo=num($(".d-lo",tr).value), hi=num($(".d-hi",tr).value),
       v1=num($(".d-v1",tr).value), v2=num($(".d-v2",tr).value);
   var dyn = $(".d-dyn",tr), st = $(".d-st",tr);
-  var t1="—", cls="";
+  /* Task 184: динамика ▲/▼ — нейтральный цвет: «рост = плохо, падение = хорошо»
+     неверно для гемоглобина/альбумина на выздоровлении. Клиническую окраску несёт
+     только статус «в норме / вне нормы» (бейдж справа) — он семантически корректен. */
+  var t1="—";
   if(v1!=null && v2!=null && v1!==0){
     var d=(v2-v1)/Math.abs(v1)*100;
     if(Math.abs(d)<0.05) t1="→ без изменений";
     else t1=(d>0?"▲ +":"▼ ")+fmt(d,1)+"%";
-    cls = d>0.05 ? "color:var(--bad)" : d<-0.05 ? "color:var(--accent)" : "";
   }
   dyn.textContent = t1;
-  dyn.style.cssText = "padding-top:9px;"+(cls?"font-weight:700;"+cls:"");
+  dyn.style.cssText = "padding-top:9px;"+((t1.charAt(0)==="▲"||t1.charAt(0)==="▼")?"font-weight:700;":"");
   var badge = "<span class='badge dim'>—</span>";
   if(v2!=null && lo!=null && hi!=null){
     if(v2<lo) badge = "<span class='badge info-badge' style='background:#e8f0fe;color:#1a56b0'>ниже нормы</span>";
