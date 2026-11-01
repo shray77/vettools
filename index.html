@@ -7,6 +7,8 @@
 <title>VetTools — офлайн-инструменты ветврача</title>
 <link rel="stylesheet" href="./vet-ds.css">
 <link rel="stylesheet" href="./fonts.css">
+<!-- Task 223 (QA З1): favicon — data-URI, ноль внешних запросов (был /favicon.ico 404) -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230D745F'/%3E%3Cpath d='M16 8v16M8 16h16' stroke='%23F0FDF9' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
 <script>(function(){try{if(localStorage.getItem("vetds-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()</script>
 <style>
 :root{
@@ -85,7 +87,8 @@ table.grid-t{width:100%;border-collapse:collapse;font-size:13.5px}
 .badge.warn{background:color-mix(in srgb, var(--warn) 12%, transparent);color:var(--warn)}
 .badge.bad{background:color-mix(in srgb, var(--bad) 12%, transparent);color:var(--bad)}
 .badge.dim{background:var(--ds-surface2);color:var(--muted)}
-.hint{font-size:12.5px;color:var(--muted);margin:4px 0 10px}
+.hint{font-size:12.5px;color:var(--muted);margin:4px 0 10px;max-width:60ch}
+/* Task 223 (QA П2): мера строки хинтов ≤60 знаков — дисклеймер калькуляторов (148 зн./1136px) напрягал чтение */
 .legal{font-size:13.5px;line-height:1.6;text-align:justify}
 .legal h3{text-align:center;font-size:15px;margin:6px 0 14px}
 .legal ul{margin:6px 0;padding-left:20px}
@@ -212,17 +215,18 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
 </head>
 <body>
 <nav class="ds-hub" aria-label="Экосистема">
-  <a href="https://shray77.github.io/">Визитка</a>
-  <a href="https://shray77.github.io/vetdigest-site/">Дайджест науки</a>
-  <a href="https://shray77.github.io/vetrecall-site/">Отзывы и вспышки РФ</a>
-  <a href="https://shray77.github.io/biothreat-site/">Биоугрозы мира</a>
-  <a href="https://shray77.github.io/vet-heatmap/">ВетКарта</a>
-  <a href="https://shray77.github.io/vetflu-site/">Окна риска ВПГП</a>
-  <a href="https://shray77.github.io/vet-meteo/">ВетМетео</a>
-  <a href="https://shray77.github.io/rss-core-site/">Статус ядра</a>
-  <a href="https://shray77.github.io/vetfecrt-site/">ФЭКРТ</a>
+  <!-- Task 223 (QA П7): внешние пилюли хаба — в новой вкладке (врач не теряет заполненный формуляр); rel=noopener обязателен при target=_blank; self-pill «VetTools» остаётся в той же -->
+  <a href="https://shray77.github.io/" target="_blank" rel="noopener">Визитка</a>
+  <a href="https://shray77.github.io/vetdigest-site/" target="_blank" rel="noopener">Дайджест науки</a>
+  <a href="https://shray77.github.io/vetrecall-site/" target="_blank" rel="noopener">Отзывы и вспышки РФ</a>
+  <a href="https://shray77.github.io/biothreat-site/" target="_blank" rel="noopener">Биоугрозы мира</a>
+  <a href="https://shray77.github.io/vet-heatmap/" target="_blank" rel="noopener">ВетКарта</a>
+  <a href="https://shray77.github.io/vetflu-site/" target="_blank" rel="noopener">Окна риска ВПГП</a>
+  <a href="https://shray77.github.io/vet-meteo/" target="_blank" rel="noopener">ВетМетео</a>
+  <a href="https://shray77.github.io/rss-core-site/" target="_blank" rel="noopener">Статус ядра</a>
+  <a href="https://shray77.github.io/vetfecrt-site/" target="_blank" rel="noopener">ФЭКРТ</a>
   <a href="https://shray77.github.io/vettools/" class="on" aria-current="page">VetTools</a>
-  <a href="https://shray77.github.io/vet-hub/">ВетХаб</a>
+  <a href="https://shray77.github.io/vet-hub/" target="_blank" rel="noopener">ВетХаб</a>
 </nav>
 <script>/* Task 195: активная пилюля — в кадре (хаб на телефоне одним рядом) */
 (function(){var a=document.querySelector('.ds-hub a.on');if(a)a.scrollIntoView({block:'nearest',inline:'center'});})();</script>
@@ -281,10 +285,12 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <div class="f"><label for="soap-sex">Пол</label>
         <select id="soap-sex"><option value=""></option><option>самец</option><option>самец (кастрирован)</option><option>самка</option><option>самка (стерилизована)</option></select></div>
       <div class="f"><label for="soap-age">Возраст</label><input type="text" id="soap-age" placeholder="например, 4 года / 8 мес"></div>
-      <div class="f"><label for="soap-weight">Вес, кг</label><input type="number" id="soap-weight" step="0.01" min="0"></div>
-      <div class="f"><label for="soap-temp">Т°, °C</label><input type="number" id="soap-temp" step="0.1"></div>
-      <div class="f"><label for="soap-hr">ЧСС, уд/мин</label><input type="number" id="soap-hr"></div>
-      <div class="f"><label for="soap-rr">ЧД, /мин</label><input type="number" id="soap-rr"></div>
+      <!-- Task 223 (QA Ш4): было type=number — «10,5» молча отвергалось (поле пустело),
+           два канона разделителя в одном продукте; теперь канон Task 183: text + inputmode=decimal -->
+      <div class="f"><label for="soap-weight">Вес, кг</label><input type="text" inputmode="decimal" data-num id="soap-weight" placeholder="напр., 10,5"></div>
+      <div class="f"><label for="soap-temp">Т°, °C</label><input type="text" inputmode="decimal" data-num id="soap-temp" placeholder="напр., 38,5"></div>
+      <div class="f"><label for="soap-hr">ЧСС, уд/мин</label><input type="text" inputmode="decimal" data-num id="soap-hr"></div>
+      <div class="f"><label for="soap-rr">ЧД, /мин</label><input type="text" inputmode="decimal" data-num id="soap-rr"></div>
       <div class="f"><label for="soap-bcs">Кондиция (BCS 1–9)</label>
         <select id="soap-bcs"><option value=""></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option></select></div>
     </div>
@@ -480,7 +486,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <div class="f"><label for="ane-info">Вид / порода</label><input type="text" id="ane-info"></div>
       <div class="f"><label for="ane-age">Возраст</label><input type="text" id="ane-age"></div>
       <div class="f"><label for="ane-sex">Пол</label><input type="text" id="ane-sex"></div>
-      <div class="f"><label for="ane-weight">Вес, кг</label><input type="number" id="ane-weight" step="0.01" min="0"></div>
+      <div class="f"><label for="ane-weight">Вес, кг</label><input type="text" inputmode="decimal" data-num id="ane-weight" placeholder="напр., 10,5"></div>
       <div class="f"><label for="ane-asa">ASA</label>
         <select id="ane-asa"><option value=""></option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>E (экстренно)</option></select></div>
       <div class="f"><label for="ane-proc">Плановая процедура</label><input type="text" id="ane-proc"></div>
@@ -575,7 +581,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <div class="f"><label for="nec-breed">Порода</label><input type="text" id="nec-breed"></div>
       <div class="f"><label for="nec-sex">Пол / кастрация</label><input type="text" id="nec-sex"></div>
       <div class="f"><label for="nec-age">Возраст</label><input type="text" id="nec-age"></div>
-      <div class="f"><label for="nec-weight">Вес, кг</label><input type="number" id="nec-weight" step="0.01" min="0"></div>
+      <div class="f"><label for="nec-weight">Вес, кг</label><input type="text" inputmode="decimal" data-num id="nec-weight" placeholder="напр., 10,5"></div>
       <div class="f"><label for="nec-death">Обстоятельства</label>
         <select id="nec-death"><option value=""></option><option>погибло в клинике</option><option>поступило трупом</option><option>эвтаназия</option></select></div>
     </div>
@@ -640,7 +646,7 @@ footer.app{max-width:1200px;margin:0 auto 30px;padding:0 16px;color:var(--muted)
       <div class="f"><label for="case-age">Возраст</label><input type="text" id="case-age" placeholder="7 лет / 8 мес"></div>
       <div class="f"><label for="case-sex">Пол</label>
         <select id="case-sex"><option value=""></option><option>самец</option><option>самец (кастрат)</option><option>самка</option><option>самка (стерилизованная)</option></select></div>
-      <div class="f"><label for="case-weight">Вес, кг</label><input type="number" id="case-weight" step="any" min="0"></div>
+      <div class="f"><label for="case-weight">Вес, кг</label><input type="text" inputmode="decimal" data-num id="case-weight" placeholder="напр., 10,5"></div>
     </div>
   </div>
   <div class="card">
@@ -898,6 +904,12 @@ function numHint(el, what){
   return "Значение должно быть больше нуля.";
 }
 var fmt = function(n,d){ if(n==null||!isFinite(n)) return "—"; d=(d==null?2:d); return n.toLocaleString("ru-RU",{maximumFractionDigits:d}); };
+/* Task 223 (QA П4): согласование счётчиков с числом — «1 исследование / 2 исследования /
+   5 исследований» (было «1 исследован.»); дробные округляются до целого для выбора формы. */
+var plural = function(n, forms){
+  n = Math.round(n); var m10 = n%10, m100 = n%100;
+  return forms[(m10===1 && m100!==11) ? 0 : ((m10>=2 && m10<=4 && (m100<12 || m100>14)) ? 1 : 2)];
+};
 var today = function(){ var d=new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); };
 
 /* ---------- вкладки ---------- */
@@ -1056,8 +1068,19 @@ function seedDefaults(id){
 }
 function resetTabControls(id){
   var tab = byId("tab-"+id);
+  /* Task 223 (QA Б2): сброс к дефолтам разметки, а не к пустым значениям. Пустое
+     значение селекта без пустой опции = selectedIndex −1, и калькуляторы после
+     «Очистить раздел» считали по коэрции null/«» («BCS null — истощение»,
+     «≈ 0 гтт/мин», «(кошка)» при пустом «Виде»). Инпутам возвращаем value-атрибут
+     («5», «50», «6», «2» — видимые дефолты), селектам — опцию с selected либо
+     первую (пустой плейсхолдер или стартовая). */
   $$("input[id],select[id],textarea[id]", tab).forEach(function(el){
-    if(el.type==="checkbox") el.checked = false; else el.value = "";
+    if(el.type==="checkbox") el.checked = false;
+    else if(el.tagName==="SELECT"){
+      var def = el.querySelector("option[selected]");
+      el.value = def ? def.value : (el.options.length ? el.options[0].value : "");
+    }
+    else el.value = el.defaultValue;
   });
   $$("table[data-table]", tab).forEach(function(t){ $("tbody", t).innerHTML = ""; });
   $$("textarea", tab).forEach(function(t){ t.style.height = ""; });
@@ -1097,7 +1120,10 @@ function calc1(){
   var w=num(byId("cal1-w").value), d=num(byId("cal1-dose").value), c=num(byId("cal1-conc").value), it=num(byId("cal1-int").value);
   var out = byId("cal1-out");
   if(!(w>0)){ out.innerHTML=numHint(byId("cal1-w"),"вес"); return; }
-  if(!(d>=0)){ out.innerHTML=numHint(byId("cal1-dose"),"дозу"); return; }
+  /* Task 223 (QA Б1/З2): было !(d>=0) — коэрция null>=0 === true пропускала пустую
+     «Дозу», и она молча считалась нулём («Разовая доза: 0 мг»); 0 мг/кг клинически
+     бессмыслен. Теперь пусто/мусор/≤0 — честная подсказка «Введите дозу». */
+  if(!(d>0)){ out.innerHTML=numHint(byId("cal1-dose"),"дозу"); return; }
   var mg = w*d, s = "Разовая доза: <b>"+fmt(mg)+" мг</b>";
   if(c>0) s += " = <b>"+fmt(mg/c, 2)+" мл</b> (при "+fmt(c)+" мг/мл)";
   if(it>0 && d>0) s += "<br>Суточно: "+fmt(mg*24/it)+" мг"+(c>0?" = "+fmt(mg*24/it/c)+" мл":"")+" <span class='dim'>(каждые "+fmt(it,1)+" ч)</span>";
@@ -1109,6 +1135,11 @@ function calc2(){
       f=num(byId("cal2-drop").value), h=num(byId("cal2-h").value);
   var out = byId("cal2-out");
   if(!(w>0)){ out.innerHTML=numHint(byId("cal2-w"),"вес"); return; }
+  /* Task 223 (QA Б2/З2): гварды селекта и знака. Пустой селект «Система» = null,
+     коэрция давала «≈ 0 гтт/мин» (null → 0); отрицательная дегидратация клинически
+     бессмысленна — честная подсказка, а не «Дефицит (-1%): 0 мл». */
+  if(p!=null && p<0){ out.innerHTML=numHint(byId("cal2-def"),"процент дегидратации"); return; }
+  if(!(f>0)){ out.innerHTML="Выберите систему инфузии (гтт/мл)."; return; }
   /* Task 184: «Дегидратация, %» — гвард-клэмп в JS (HTML-атрибут max=15 исчез при
      переходе на type=text в 183-й волне): выше 15% — вне шкалы оценки, молчаливый
      «дефицит 200 мл/кг» недопустим; считаем по 15% и честно помечаем это в выводе. */
@@ -1117,16 +1148,24 @@ function calc2(){
     dhClamp = "<br><span class='dim'>⚠ Введено "+fmt(p,1)+"% — выше шкалы оценки: расчёт по 15%. Пересмотрите оценку дегидратации и состояние пациента.</span>";
     p = 15;
   }
+  /* Task 223 (QA Ш1): пустое/мусорное «Поддержание» молча подменялось 40 мл/кг/сут
+     при видимом дефолте 50 — итог 900 вместо 1000 мл/сут без пояснений; теперь
+     честное предупреждение (математика не менялась). */
+  var maintMsg = "";
+  if(!(m>0)) maintMsg = "<br><span class='dim'>⚠ "+numHint(byId("cal2-maint"),"поддержание, мл/кг/сут")+" Считаю по 40 мл/кг/сут.</span>";
   var def = (p>0? p*w*10 : 0);           // мл: % × кг × 10
   var maint = (m>0? m*w : 40*w);          // мл/сут
   var total = def + maint;
-  var s = "Дефицит ("+fmt(p||0,1)+"%): <b>"+fmt(def,0)+" мл</b> · поддержание: <b>"+fmt(maint,0)+" мл/сут</b>"+dhClamp+"<br>";
+  var s = "Дефицит ("+fmt(p||0,1)+"%): <b>"+fmt(def,0)+" мл</b> · поддержание: <b>"+fmt(maint,0)+" мл/сут</b>"+dhClamp+maintMsg+"<br>";
   if(def>0 && h>0){
     var sp = (def + maint*h/24)/h;
     s += "Первые "+fmt(h,0)+" ч: <b>"+fmt(sp,0)+" мл/ч</b> ≈ <b>"+fmt(sp*f/60,1)+" гтт/мин</b> ("+fmt(f,0)+" гтт/мл)<br>";
     s += "Далее поддержание: "+fmt(maint/24,0)+" мл/ч ≈ "+fmt(maint/24*f/60,1)+" гтт/мин<br>";
   } else {
     s += "Скорость: <b>"+fmt(total/24,0)+" мл/ч</b> ≈ <b>"+fmt(total/24*f/60,1)+" гтт/мин</b><br>";
+    /* Task 223 (QA Ш2): пустое/мусорное «Дефицит восполнить за, ч» молча меняло
+       схему терапии на равномерные 24 ч — теперь предупреждение рядом со скоростью. */
+    if(def>0) s += "<span class='dim'>⚠ "+numHint(byId("cal2-h"),"срок восполнения дефицита, ч")+" Считаю весь объём равномерно за 24 ч.</span><br>";
   }
   s += "<span class='dim'>Всего за сутки: "+fmt(total,0)+" мл. Дефицит обычно восполняют за 4–12 ч; при сердечной/почечной патологии скорость и объём корректирует врач.</span>";
   out.innerHTML = s;
@@ -1148,6 +1187,9 @@ function calc3(){
   var out = byId("cal3-out");
   var r = rer(w);
   if(!r){ out.innerHTML=numHint(byId("cal3-w"),"вес"); return; }
+  /* Task 223 (QA Б2): пустой «Физиологический статус» давал криптичное «MER: — ккал/сут
+     (×—)» (parseFloat("") = NaN) — честный гвард. */
+  if(!(f>0)){ out.innerHTML="Выберите физиологический статус."; return; }
   var mer = r*f;
   var s = "RER: <b>"+fmt(r,0)+" ккал/сут</b> · MER: <b>"+fmt(mer,0)+" ккал/сут</b> (×"+fmt(f,1)+")";
   /* Task 183: честная подпись активной формулы (шов 2/45 кг — см. rer()) */
@@ -1155,7 +1197,9 @@ function calc3(){
   if(kc>0){
     var g = mer/kc*100;
     s += "<br>Корма: <b>"+fmt(g,0)+" г/сут</b>";
-    if(meals>1) s += " → по <b>"+fmt(g/meals,0)+" г</b> × "+fmt(meals,0)+" кормления";
+    /* Task 223 (QA П4): согласование с числом — «× 2 кормления / × 5 кормлений»
+       (было всегда множественное «× 1 кормления»). */
+    if(meals>1) s += " → по <b>"+fmt(g/meals,0)+" г</b> × "+fmt(meals,0)+" "+plural(meals,["кормление","кормления","кормлений"]);
   } else {
     s += "<br><span class='dim'>Укажите калорийность корма (ккал/100 г) — переведу в граммы.</span>";
   }
@@ -1166,6 +1210,8 @@ function calc4(){
   var w=num(byId("cal4-w").value), sp=byId("cal4-sp").value, d=num(byId("cal4-dose").value);
   var out = byId("cal4-out");
   if(!(w>0)){ out.innerHTML=numHint(byId("cal4-w"),"вес"); return; }
+  /* Task 223 (QA Б2): пустой «Вид» молча подставлял «кошку» (else-ветка) — гвард. */
+  if(sp!=="dog" && sp!=="cat"){ out.innerHTML="Выберите вид животного."; return; }
   var k = (sp==="dog") ? 10.1 : 10.0;
   var bsa = k*Math.pow(w*1000, 2/3)/10000;
   var s = "BSA: <b>"+fmt(bsa,3)+" м²</b> <span class='dim'>("+(sp==="dog"?"собака":"кошка")+")</span>";
@@ -1176,6 +1222,10 @@ function calc6(){
   var w=num(byId("cal6-w").value), b=num(byId("cal6-bcs").value), sp=byId("cal6-sp").value;
   var out = byId("cal6-out");
   if(!(w>0)){ out.innerHTML=numHint(byId("cal6-w"),"текущий вес"); return; }
+  /* Task 223 (QA Б2): пустые селекты коэрсились — «BCS null — выраженный дефицит /
+     истощение» ("" <= 2); честные гварды BCS и вида. */
+  if(b==null){ out.innerHTML="Выберите BCS (1–9)."; return; }
+  if(sp!=="dog" && sp!=="cat"){ out.innerHTML="Выберите вид животного."; return; }
   var s;
   if(b==5){
     s = "BCS 5 — идеальная кондиция, целевой вес: <b>"+fmt(w)+" кг</b>. Поддерживайте текущий рацион (MER ×1.6 — собака, ×1.2 — кошка).";
@@ -1224,10 +1274,29 @@ function buildConverter(){
     tb.appendChild(tr);
     (function(i){
       var si=byId("cv-si-"+i), x=byId("cv-x-"+i), f=CONV[i][3];
-      /* Task 183: RU-запятая в выводе конвертера — «90,08», не «90.08» (канон fmt) */
-      var round3=function(v){ return String(Math.round(v*1000)/1000).replace(".", ","); };
-      si.addEventListener("input", function(){ var v=num(si.value); x.value = v==null?"":round3(v*f); });
-      x.addEventListener("input", function(){ var v=num(x.value); si.value = v==null?"":round3(v/f); });
+      /* Task 183: RU-запятая в выводе конвертера — «90,08», не «90.08» (канон fmt).
+         Task 223 (QA П5): группировка разрядов тем же каноном fmt/ru-RU — «18 016»,
+         не «18016»: одно правило печати чисел на одной вкладке с калькуляторами. */
+      var round3=function(v){ return v.toLocaleString("ru-RU",{maximumFractionDigits:3}); };
+      /* Task 223 (QA Ш3): точка/мусор раньше молча опустошали парную колонку — теперь
+         честная подсказка в плейсхолдере парного поля (полный текст — в title
+         поля-источника), пока ввод не станет числом с запятой. */
+      var pair=function(src,dst,mult){
+        var v=num(src.value);
+        if(v==null){
+          dst.value="";
+          var t=String(src.value).trim();
+          var dot=t.indexOf(".")>=0;
+          dst.placeholder = t==="" ? "" : (dot ? "пишите 5,5, не 5.5" : "введите число: 5,5");
+          src.title = t==="" ? "" : (dot ? "Точка — не десятичный разделитель: пишите через запятую, напр. 5,5"
+                                          : "Не понимаю «"+t+"» как число — десятичный разделитель: запятая (напр., 5,5)");
+        }else{
+          dst.placeholder=""; src.title="";
+          dst.value=round3(v*mult);
+        }
+      };
+      si.addEventListener("input", function(){ pair(si,x,f); });
+      x.addEventListener("input", function(){ pair(x,si,1/f); });
     })(i);
   });
 }
@@ -1404,14 +1473,32 @@ function showCopyDialog(text){
   dlg.appendChild(box);
   document.body.appendChild(dlg);
   var ta = $("textarea", box); ta.value = text; ta.focus(); ta.select();
-  $("[data-x]", box).onclick = function(){ document.body.removeChild(dlg); };
-  $("[data-c]", box).onclick = function(){
-    var done = function(){ $("[data-c]", box).textContent = "Скопировано ✓"; };
+  var btnX = $("[data-x]", box), btnC = $("[data-c]", box);
+  /* Task 223 (QA П6): Esc закрывает модалку, Tab не уводит фокус под оверлей
+     (WCAG 2.1.2 — фокус остаётся в диалоге); слушатель capture-фазой снимается
+     при закрытии, повторный Esc после закрытия не стреляет. */
+  var close = function(){
+    document.removeEventListener("keydown", onKey, true);
+    if(dlg.parentNode) document.body.removeChild(dlg);
+  };
+  var onKey = function(e){
+    if(e.key==="Escape"){ e.preventDefault(); close(); return; }
+    if(e.key==="Tab"){
+      var f = [ta, btnX, btnC];
+      var i = f.indexOf(document.activeElement); if(i<0) i = 0;
+      e.preventDefault();
+      f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+    }
+  };
+  document.addEventListener("keydown", onKey, true);
+  btnX.onclick = close;
+  btnC.onclick = function(){
+    var done = function(){ btnC.textContent = "Скопировано ✓"; };
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(done, function(){ ta.select(); document.execCommand("copy"); done(); });
     } else { ta.select(); try{ document.execCommand("copy"); }catch(e){} done(); }
   };
-  dlg.addEventListener("click", function(e){ if(e.target===dlg) document.body.removeChild(dlg); });
+  dlg.addEventListener("click", function(e){ if(e.target===dlg) close(); });
 }
 byId("btn-copy-dis").addEventListener("click", function(){ showCopyDialog(buildDisText()); });
 
@@ -1608,7 +1695,7 @@ function runCaseCheck(){
   /* диагностика */
   var dxr=caseDxRows(), dxNamed=dxr.filter(function(r){ return r.n; });
   if(!dxNamed.length) add("warn","Диагностика не описана — добавь хотя бы одно исследование со строкой заключения");
-  else add("ok","Диагностика: "+dxNamed.length+" исследован.");
+  else add("ok","Диагностика: "+dxNamed.length+" "+plural(dxNamed.length,["исследование","исследования","исследований"]));
   dxNamed.forEach(function(r,i){
     if(!r.r) add("warn","«"+r.n+"» (строка "+(i+1)+"): исследование названо, но заключения/результата нет — именно это теряют разборы");
   });
@@ -1630,7 +1717,7 @@ function runCaseCheck(){
   /* лечение */
   var rxr=caseRxRows();
   if(!rxr.length && !g("case-control")) add("warn","Лечение не описано (ни строки препарата, ни динамики)");
-  else if(rxr.length) add("ok","Лечение: "+rxr.length+" назначен.");
+  else if(rxr.length) add("ok","Лечение: "+rxr.length+" "+plural(rxr.length,["назначение","назначения","назначений"]));
   rxr.forEach(function(r){
     if(r.n && !r.d) add("warn","Препарат «"+r.n+"»: нет дозы/пути — в разборе без дозы назначение не считается");
   });
